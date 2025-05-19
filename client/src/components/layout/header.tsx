@@ -41,24 +41,24 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8 items-center">
             <Link href="/">
-              <a className={`${isActive("/") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium`}>
+              <span className={`${isActive("/") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
                 Início
-              </a>
+              </span>
             </Link>
             <Link href={isAuthenticated ? "/dashboard" : "/login"}>
-              <a className={`${isActive("/dashboard") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium`}>
+              <span className={`${isActive("/dashboard") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
                 Dashboard
-              </a>
+              </span>
             </Link>
             <Link href="/planos">
-              <a className={`${isActive("/planos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium`}>
+              <span className={`${isActive("/planos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
                 Planos
-              </a>
+              </span>
             </Link>
             <Link href="/recursos">
-              <a className={`${isActive("/recursos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium`}>
+              <span className={`${isActive("/recursos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
                 Recursos
-              </a>
+              </span>
             </Link>
             
             <div className="relative ml-3">
@@ -82,16 +82,16 @@ export default function Header() {
                       <ChevronDown className="ml-1 h-4 w-4 text-gray-400" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Link href="/perfil">
-                          <a className="w-full">Seu Perfil</a>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link href="/configuracoes">
-                          <a className="w-full">Configurações</a>
-                        </Link>
-                      </DropdownMenuItem>
+                      <Link href="/perfil">
+                        <DropdownMenuItem className="cursor-pointer">
+                          Seu Perfil
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link href="/configuracoes">
+                        <DropdownMenuItem className="cursor-pointer">
+                          Configurações
+                        </DropdownMenuItem>
+                      </Link>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>
                         Sair
@@ -122,24 +122,24 @@ export default function Header() {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link href="/">
-              <a className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
+              <span className={`block px-3 py-2 rounded-md text-base font-medium cursor-pointer ${isActive("/") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
                 Início
-              </a>
+              </span>
             </Link>
             <Link href={isAuthenticated ? "/dashboard" : "/login"}>
-              <a className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/dashboard") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
+              <span className={`block px-3 py-2 rounded-md text-base font-medium cursor-pointer ${isActive("/dashboard") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
                 Dashboard
-              </a>
+              </span>
             </Link>
             <Link href="/planos">
-              <a className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/planos") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
+              <span className={`block px-3 py-2 rounded-md text-base font-medium cursor-pointer ${isActive("/planos") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
                 Planos
-              </a>
+              </span>
             </Link>
             <Link href="/recursos">
-              <a className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/recursos") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
+              <span className={`block px-3 py-2 rounded-md text-base font-medium cursor-pointer ${isActive("/recursos") ? "text-navy bg-neutral-lightest" : "text-neutral-dark hover:text-navy hover:bg-neutral-lightest"}`}>
                 Recursos
-              </a>
+              </span>
             </Link>
           </div>
           
@@ -160,14 +160,14 @@ export default function Header() {
               </div>
               <div className="mt-3 space-y-1">
                 <Link href="/perfil">
-                  <a className="block px-4 py-2 text-base font-medium text-neutral-dark hover:text-navy hover:bg-neutral-lightest">
+                  <span className="block px-4 py-2 text-base font-medium text-neutral-dark hover:text-navy hover:bg-neutral-lightest cursor-pointer">
                     Seu Perfil
-                  </a>
+                  </span>
                 </Link>
                 <Link href="/configuracoes">
-                  <a className="block px-4 py-2 text-base font-medium text-neutral-dark hover:text-navy hover:bg-neutral-lightest">
+                  <span className="block px-4 py-2 text-base font-medium text-neutral-dark hover:text-navy hover:bg-neutral-lightest cursor-pointer">
                     Configurações
-                  </a>
+                  </span>
                 </Link>
                 <a 
                   href="/api/logout"

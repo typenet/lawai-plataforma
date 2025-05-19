@@ -3,54 +3,118 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Users, FileText, Search } from "lucide-react";
+import { useABTest } from "@/hooks/useABTest";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const { variant, isVariantA, isVariantB } = useABTest({
+    testId: "home_page_layout",
+    defaultVariant: "A"
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-grow">
-        {/* Hero Section */}
-        <div className="bg-[#0E2C4B] text-white py-12 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
-              <div>
-                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white">
-                  Inteligência Artificial para Advogados
-                </h1>
-                <p className="mt-6 text-xl max-w-3xl text-white">
-                  Otimize seu trabalho jurídico com nossa plataforma de IA especializada. 
-                  Economize tempo, reduza custos e melhore a qualidade do seu serviço.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-4">
-                  <Button 
-                    className="bg-gold hover:bg-gold-dark text-navy font-medium px-8 py-3 text-lg"
-                    onClick={() => window.location.href = isAuthenticated ? "/dashboard" : "/api/login"}
-                  >
-                    {isAuthenticated ? "Acessar Dashboard" : "Começar Agora"}
-                  </Button>
-                  <Link href="#recursos">
-                    <Button variant="outline" className="border-white bg-white/20 text-white hover:bg-white/30 px-8 py-3 text-lg">
-                      Explorar Recursos
+        {/* Hero Section - Variante A/B */}
+        {isVariantA ? (
+          // Variante A - Layout Original
+          <div className="bg-[#0E2C4B] text-white py-12 md:py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
+                <div>
+                  <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white">
+                    Inteligência Artificial para Advogados
+                  </h1>
+                  <p className="mt-6 text-xl max-w-3xl text-white">
+                    Otimize seu trabalho jurídico com nossa plataforma de IA especializada. 
+                    Economize tempo, reduza custos e melhore a qualidade do seu serviço.
+                  </p>
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    <Button 
+                      className="bg-gold hover:bg-gold-dark text-navy font-medium px-8 py-3 text-lg"
+                      onClick={() => window.location.href = isAuthenticated ? "/dashboard" : "/api/login"}
+                    >
+                      {isAuthenticated ? "Acessar Dashboard" : "Começar Agora"}
                     </Button>
-                  </Link>
+                    <Link href="#recursos">
+                      <Button variant="outline" className="border-white bg-white/20 text-white hover:bg-white/30 px-8 py-3 text-lg">
+                        Explorar Recursos
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-12 lg:mt-0">
-                <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
-                  <img 
-                    src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                    alt="Documentos jurídicos com IA" 
-                    className="w-full rounded-lg shadow-lg"
-                  />
+                <div className="mt-12 lg:mt-0">
+                  <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+                    <img 
+                      src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                      alt="Documentos jurídicos com IA" 
+                      className="w-full rounded-lg shadow-lg"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          // Variante B - Layout Alternativo
+          <div className="bg-gradient-to-br from-[#0a1d33] to-[#183c66] text-white py-16 md:py-24">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white mb-6">
+                  Revolucione Sua Prática Jurídica
+                </h1>
+                <p className="mt-4 text-xl max-w-3xl mx-auto text-white/90">
+                  Sua assistente jurídica com inteligência artificial, disponível 24 horas por dia.
+                  Economize até 70% do seu tempo em pesquisas e análises.
+                </p>
+                <div className="mt-10 flex flex-wrap gap-6 justify-center">
+                  <Button 
+                    className="bg-[#FFD700] hover:bg-[#F5C400] text-[#0a1d33] font-medium px-10 py-4 text-lg shadow-lg"
+                    onClick={() => window.location.href = isAuthenticated ? "/dashboard" : "/api/login"}
+                  >
+                    {isAuthenticated ? "Meu Dashboard" : "Experimente Grátis"}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-white/60 text-white hover:bg-white/10 px-10 py-4 text-lg"
+                    onClick={() => window.scrollTo({ top: document.querySelector('#recursos')?.offsetTop, behavior: 'smooth' })}
+                  >
+                    Ver Demonstração
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center hover:bg-white/15 transition-all">
+                  <div className="w-16 h-16 mx-auto bg-[#FFD700]/20 rounded-full flex items-center justify-center mb-4">
+                    <Search className="w-8 h-8 text-[#FFD700]" />
+                  </div>
+                  <h3 className="text-xl font-bold">Pesquisa Inteligente</h3>
+                  <p className="mt-3 text-white/80">Encontre jurisprudência relevante em segundos com precisão inigualável.</p>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center hover:bg-white/15 transition-all">
+                  <div className="w-16 h-16 mx-auto bg-[#FFD700]/20 rounded-full flex items-center justify-center mb-4">
+                    <FileText className="w-8 h-8 text-[#FFD700]" />
+                  </div>
+                  <h3 className="text-xl font-bold">Análise de Documentos</h3>
+                  <p className="mt-3 text-white/80">Analise contratos e petições automaticamente, identificando riscos.</p>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center hover:bg-white/15 transition-all">
+                  <div className="w-16 h-16 mx-auto bg-[#FFD700]/20 rounded-full flex items-center justify-center mb-4">
+                    <Users className="w-8 h-8 text-[#FFD700]" />
+                  </div>
+                  <h3 className="text-xl font-bold">Suporte 24h</h3>
+                  <p className="mt-3 text-white/80">Assistência jurídica baseada em IA disponível a qualquer momento.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Features Section */}
         <div id="recursos" className="py-16 bg-neutral-lightest">
