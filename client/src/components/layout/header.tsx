@@ -66,7 +66,7 @@ export default function Header() {
                 {!isAuthenticated ? (
                   <Button 
                     variant="default" 
-                    className="bg-navy hover:bg-navy-light"
+                    className="bg-[#0E2C4B] hover:bg-[#173E66] text-white font-medium"
                     onClick={() => window.location.href = "/api/login"}
                   >
                     Entrar
