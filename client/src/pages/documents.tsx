@@ -81,70 +81,48 @@ export default function Documents() {
     type, 
     title, 
     date, 
-    description, 
-    badgeColor
+    description
   }: { 
     type: "Contrato" | "Petição" | "Relatório" | "Processo", 
     title: string, 
     date: string, 
-    description: string,
-    badgeColor: string
+    description: string
   }) => {
     const getBadgeStyles = () => {
       switch (type) {
         case "Contrato":
-          return "bg-blue-100 text-blue-600";
+          return "bg-blue-50 text-blue-600";
         case "Petição":
-          return "bg-purple-100 text-purple-600";
+          return "bg-purple-50 text-purple-600";
         case "Relatório":
-          return "bg-amber-100 text-amber-600";
+          return "bg-amber-50 text-amber-600";
         case "Processo":
-          return "bg-green-100 text-green-600";
+          return "bg-green-50 text-green-600";
         default:
-          return "bg-gray-100 text-gray-600";
-      }
-    };
-
-    const getIconBg = () => {
-      switch (type) {
-        case "Contrato":
-          return "bg-blue-100 text-blue-600";
-        case "Petição":
-          return "bg-purple-100 text-purple-600";
-        case "Relatório":
-          return "bg-amber-100 text-amber-600";
-        case "Processo":
-          return "bg-green-100 text-green-600";
-        default:
-          return "bg-gray-100 text-gray-600";
+          return "bg-gray-50 text-gray-600";
       }
     };
 
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-        <div className="flex items-start mb-3">
-          <div className={`flex-shrink-0 mr-3 p-2 rounded-md ${getIconBg()}`}>
-            <FileIcon className="h-5 w-5" />
+      <div className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-sm transition-shadow">
+        <div className="mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getBadgeStyles()}`}>
+              {type}
+            </span>
+            <span className="text-xs text-gray-500 flex items-center">
+              <Calendar className="h-3 w-3 mr-1" />
+              {date}
+            </span>
           </div>
-          <div className="flex-grow">
-            <div className="flex items-center mb-1">
-              <span className={`text-xs px-2.5 py-0.5 rounded-full ${getBadgeStyles()}`}>
-                {type}
-              </span>
-              <span className="text-xs text-gray-500 ml-2 flex items-center">
-                <Calendar className="h-3 w-3 mr-1" />
-                {date}
-              </span>
-            </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">{title}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
-          </div>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">{title}</h3>
+          <p className="text-sm text-gray-600 line-clamp-2 mb-4">{description}</p>
         </div>
-        <div className="flex justify-between mt-4">
-          <button className="text-sm text-gray-500 hover:text-gray-700 font-medium">
+        <div className="flex justify-between border-t pt-4">
+          <button className="text-sm text-gray-500 hover:text-gray-700">
             Visualizar
           </button>
-          <button className="text-sm text-[#9F85FF] hover:text-[#8A6EF3] font-medium">
+          <button className="text-sm text-[#9F85FF] hover:text-[#8A6EF3]">
             Ver análise
           </button>
         </div>
@@ -159,48 +137,42 @@ export default function Documents() {
       type: "Contrato" as const,
       title: "Contrato de Prestação de Serviços de Advocacia",
       date: "12/05/2025",
-      description: "Este contrato estabelece as condições para prestação de serviços advocatícios...",
-      color: "blue"
+      description: "Este contrato estabelece as condições para prestação de serviços advocatícios..."
     },
     {
       id: "2",
       type: "Petição" as const,
       title: "Petição Inicial - Processo nº 0123456-78.2025.8.26.0100",
       date: "10/05/2025",
-      description: "Trata-se de petição inicial referente ao processo de indenização por danos morais...",
-      color: "purple"
+      description: "Trata-se de petição inicial referente ao processo de indenização por danos morais..."
     },
     {
       id: "3",
       type: "Relatório" as const,
       title: "Relatório de Audiência - Caso Silva vs Empresa XYZ",
       date: "05/05/2025",
-      description: "Na audiência realizada no dia 05/05, as partes deliberaram sobre os seguintes pontos...",
-      color: "amber"
+      description: "Na audiência realizada no dia 05/05, as partes deliberaram sobre os seguintes pontos..."
     },
     {
       id: "4",
       type: "Contrato" as const,
       title: "Contrato de Aluguel Comercial - Imóvel Centro",
       date: "01/05/2025",
-      description: "Contrato de locação do imóvel situado na Rua Principal, nº 123, para fins comerciais...",
-      color: "blue"
+      description: "Contrato de locação do imóvel situado na Rua Principal, nº 123, para fins comerciais..."
     },
     {
       id: "5",
       type: "Petição" as const,
       title: "Contestação - Processo nº 1234567-89.2025.8.26.0100",
       date: "28/04/2025",
-      description: "Em resposta à petição inicial, vem apresentar contestação aos fatos alegados pelo autor...",
-      color: "purple"
+      description: "Em resposta à petição inicial, vem apresentar contestação aos fatos alegados pelo autor..."
     },
     {
       id: "6",
       type: "Processo" as const,
       title: "Acompanhamento Processual - Ação de Cobrança",
       date: "25/04/2025",
-      description: "Resumo do andamento processual da ação de cobrança movida contra Empresa ABC Ltda...",
-      color: "green"
+      description: "Resumo do andamento processual da ação de cobrança movida contra Empresa ABC Ltda..."
     }
   ];
 
@@ -364,7 +336,7 @@ export default function Documents() {
           </div>
 
           {/* Document Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sampleDocuments.map(doc => (
               <DocumentCard
                 key={doc.id}
@@ -372,7 +344,6 @@ export default function Documents() {
                 title={doc.title}
                 date={doc.date}
                 description={doc.description}
-                badgeColor={doc.color}
               />
             ))}
           </div>
