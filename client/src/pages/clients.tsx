@@ -80,16 +80,32 @@ export default function ClientsPage() {
   const editClientMutation = useMutation({
     mutationFn: async (data: any) => {
       if (!clientToEdit) return null;
-      return fetch(`/api/clients/${clientToEdit.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }).then(res => {
-        if (!res.ok) throw new Error("Falha ao atualizar cliente");
-        return res.json();
-      });
+      try {
+        const response = await fetch(`/api/clients/${clientToEdit.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Erro na resposta do servidor:", errorText);
+          throw new Error("Falha ao atualizar cliente");
+        }
+        
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          return await response.json();
+        } else {
+          // Se a resposta não for JSON, retorna um objeto simples
+          return { success: true };
+        }
+      } catch (error) {
+        console.error("Erro ao processar requisição:", error);
+        throw new Error("Falha ao atualizar cliente: " + (error instanceof Error ? error.message : "Erro desconhecido"));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
