@@ -14,14 +14,14 @@ export default function Home() {
       
       <main className="flex-grow">
         {/* Hero Section */}
-        <div className="bg-navy text-white py-12 md:py-20">
+        <div className="bg-[#0E2C4B] text-white py-12 md:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
               <div>
-                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white">
                   Inteligência Artificial para Advogados
                 </h1>
-                <p className="mt-6 text-xl max-w-3xl">
+                <p className="mt-6 text-xl max-w-3xl text-white">
                   Otimize seu trabalho jurídico com nossa plataforma de IA especializada. 
                   Economize tempo, reduza custos e melhore a qualidade do seu serviço.
                 </p>
@@ -40,7 +40,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-12 lg:mt-0">
-                <div className="bg-white/5 rounded-lg p-6 backdrop-blur-sm">
+                <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
                   <img 
                     src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
                     alt="Documentos jurídicos com IA" 
