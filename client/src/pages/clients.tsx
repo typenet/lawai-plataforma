@@ -22,8 +22,10 @@ export default function ClientsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<number | null>(null);
+  const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     documentType: "CPF",
@@ -74,6 +76,40 @@ export default function ClientsPage() {
     },
   });
 
+  // Mutação para editar cliente
+  const editClientMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (!clientToEdit) return null;
+      return fetch(`/api/clients/${clientToEdit.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }).then(res => {
+        if (!res.ok) throw new Error("Falha ao atualizar cliente");
+        return res.json();
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      setIsEditClientOpen(false);
+      setClientToEdit(null);
+      resetForm();
+      toast({
+        title: "Cliente atualizado",
+        description: "As informações do cliente foram atualizadas com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar cliente",
+        description: error.message || "Ocorreu um erro ao atualizar o cliente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteClientMutation = useMutation({
     mutationFn: async (id: number) => {
       return fetch(`/api/clients/${id}`, {
@@ -112,7 +148,28 @@ export default function ClientsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addClientMutation.mutate(formData);
+    if (isEditClientOpen) {
+      editClientMutation.mutate(formData);
+    } else {
+      addClientMutation.mutate(formData);
+    }
+  };
+  
+  // Função para abrir o modal de edição
+  const openEditClient = (client: Client) => {
+    setClientToEdit(client);
+    setFormData({
+      name: client.name,
+      documentType: client.documentType || "CPF",
+      documentNumber: client.documentNumber || "",
+      email: client.email || "",
+      phone: client.phone || "",
+      address: client.address || "",
+      city: client.city || "",
+      state: client.state || "",
+      notes: client.notes || "",
+    });
+    setIsEditClientOpen(true);
   };
 
   const confirmDelete = (id: number) => {
@@ -203,10 +260,7 @@ export default function ClientsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="icon" onClick={() => toast({
-                            title: "Editar cliente",
-                            description: "Funcionalidade em desenvolvimento"
-                          })}>
+                          <Button variant="outline" size="icon" onClick={() => openEditClient(client)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="icon" onClick={() => toast({
