@@ -202,7 +202,7 @@ export default function HistoryPage() {
             icon={<BarChart className="h-5 w-5" />}
             label="Analytics"
             active={activeSection === "analytics"}
-            onClick={() => setActiveSection("analytics")}
+            onClick={() => window.location.href = "/analytics"}
           />
           <SidebarLink
             icon={<Users className="h-5 w-5" />}
