@@ -19,18 +19,19 @@ import {
   Calendar, 
   MessageSquare, 
   Bell,
-  Filter,
-  FileText as FileIcon,
+  EyeIcon,
+  Download,
+  FileIcon,
   BarChart
 } from "lucide-react";
 import { AnalyzedDocument } from "@/lib/types";
 
-export default function Documents() {
+export default function HistoryPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [_, navigate] = useLocation();
   const { toast } = useToast();
-  const [activeSection, setActiveSection] = useState("documents");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSection, setActiveSection] = useState("history");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: documents, isLoading: documentsLoading } = useQuery<AnalyzedDocument[]>({
     queryKey: ["/api/documents"],
@@ -44,7 +45,7 @@ export default function Documents() {
         description: "Você precisa estar logado para acessar esta página.",
         variant: "destructive",
       });
-      window.location.href = "/api/login?returnTo=/documentos";
+      window.location.href = "/api/login?returnTo=/historico";
     }
   }, [isAuthenticated, authLoading, toast]);
 
@@ -76,103 +77,77 @@ export default function Documents() {
     </button>
   );
 
-  // Componente de card de documento
-  const DocumentCard = ({ 
-    type, 
-    title, 
-    date, 
-    description
-  }: { 
-    type: "Contrato" | "Petição" | "Relatório" | "Processo", 
-    title: string, 
-    date: string, 
-    description: string
-  }) => {
-    const getBadgeStyles = () => {
-      switch (type) {
-        case "Contrato":
-          return "bg-blue-50 text-blue-600";
-        case "Petição":
-          return "bg-purple-50 text-purple-600";
-        case "Relatório":
-          return "bg-amber-50 text-amber-600";
-        case "Processo":
-          return "bg-green-50 text-green-600";
+  // Status badge component
+  const StatusBadge = ({ status }: { status: "Concluído" | "Processando" | "Erro" }) => {
+    const getStatusStyles = () => {
+      switch (status) {
+        case "Concluído":
+          return "bg-green-100 text-green-700";
+        case "Processando":
+          return "bg-blue-100 text-blue-700";
+        case "Erro":
+          return "bg-red-100 text-red-700";
         default:
-          return "bg-gray-50 text-gray-600";
+          return "bg-gray-100 text-gray-700";
       }
     };
 
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-sm transition-shadow">
-        <div className="mb-2">
-          <div className="flex items-center justify-between mb-2">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getBadgeStyles()}`}>
-              {type}
-            </span>
-            <span className="text-xs text-gray-500 flex items-center">
-              <Calendar className="h-3 w-3 mr-1" />
-              {date}
-            </span>
-          </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">{title}</h3>
-          <p className="text-sm text-gray-600 line-clamp-2 mb-4">{description}</p>
-        </div>
-        <div className="flex justify-between border-t pt-4">
-          <button className="text-sm text-gray-500 hover:text-gray-700">
-            Visualizar
-          </button>
-          <button className="text-sm text-[#9F85FF] hover:text-[#8A6EF3]">
-            Ver análise
-          </button>
-        </div>
-      </div>
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyles()}`}>
+        {status}
+      </span>
     );
   };
 
-  // Documentos de exemplo para visualização
-  const sampleDocuments = [
+  // Histórico de documentos para visualização
+  const historyDocuments = [
     {
       id: "1",
-      type: "Contrato" as const,
       title: "Contrato de Prestação de Serviços de Advocacia",
+      type: "Contrato",
       date: "12/05/2025",
-      description: "Este contrato estabelece as condições para prestação de serviços advocatícios..."
+      status: "Concluído" as const,
+      insights: 5
     },
     {
       id: "2",
-      type: "Petição" as const,
       title: "Petição Inicial - Processo nº 0123456-78.2025.8.26.0100",
+      type: "Petição",
       date: "10/05/2025",
-      description: "Trata-se de petição inicial referente ao processo de indenização por danos morais..."
+      status: "Concluído" as const,
+      insights: 4
     },
     {
       id: "3",
-      type: "Relatório" as const,
       title: "Relatório de Audiência - Caso Silva vs Empresa XYZ",
+      type: "Relatório",
       date: "05/05/2025",
-      description: "Na audiência realizada no dia 05/05, as partes deliberaram sobre os seguintes pontos..."
+      status: "Concluído" as const,
+      insights: 3
     },
     {
       id: "4",
-      type: "Contrato" as const,
       title: "Contrato de Aluguel Comercial - Imóvel Centro",
+      type: "Contrato",
       date: "01/05/2025",
-      description: "Contrato de locação do imóvel situado na Rua Principal, nº 123, para fins comerciais..."
+      status: "Concluído" as const,
+      insights: 4
     },
     {
       id: "5",
-      type: "Petição" as const,
       title: "Contestação - Processo nº 1234567-89.2025.8.26.0100",
+      type: "Petição",
       date: "28/04/2025",
-      description: "Em resposta à petição inicial, vem apresentar contestação aos fatos alegados pelo autor..."
+      status: "Processando" as const,
+      insights: null
     },
     {
       id: "6",
-      type: "Processo" as const,
       title: "Acompanhamento Processual - Ação de Cobrança",
+      type: "Processo",
       date: "25/04/2025",
-      description: "Resumo do andamento processual da ação de cobrança movida contra Empresa ABC Ltda..."
+      status: "Erro" as const,
+      insights: null
     }
   ];
 
@@ -215,13 +190,13 @@ export default function Documents() {
             icon={<FileText className="h-5 w-5" />}
             label="Documentos"
             active={activeSection === "documents"}
-            onClick={() => setActiveSection("documents")}
+            onClick={() => window.location.href = "/documentos"}
           />
           <SidebarLink
             icon={<History className="h-5 w-5" />}
             label="Histórico"
             active={activeSection === "history"}
-            onClick={() => window.location.href = "/historico"}
+            onClick={() => setActiveSection("history")}
           />
           <SidebarLink
             icon={<BarChart className="h-5 w-5" />}
@@ -295,57 +270,101 @@ export default function Documents() {
           </div>
         </header>
 
-        {/* Documents Content */}
+        {/* History Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">Meus Documentos</h2>
-              <p className="text-gray-600 mt-1">Visualize e gerencie seus documentos jurídicos</p>
-            </div>
-            <Button 
-              className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white"
-              onClick={() => window.location.href = "/novo-documento"}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo documento
-            </Button>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Histórico de Análises</h2>
+            <p className="text-gray-600 mt-1">Veja o histórico de documentos analisados pela nossa IA</p>
           </div>
 
-          {/* Search and Filter */}
-          <div className="mb-6 flex justify-between">
-            <div className="relative w-full max-w-md">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+          {/* History Table */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left border-b border-gray-200">
+                    <th className="px-6 py-3 text-gray-500 font-medium text-sm">Documento</th>
+                    <th className="px-6 py-3 text-gray-500 font-medium text-sm">Tipo</th>
+                    <th className="px-6 py-3 text-gray-500 font-medium text-sm">Data</th>
+                    <th className="px-6 py-3 text-gray-500 font-medium text-sm">Status</th>
+                    <th className="px-6 py-3 text-gray-500 font-medium text-sm">Insights</th>
+                    <th className="px-6 py-3 text-gray-500 font-medium text-sm">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {historyDocuments.map((doc) => (
+                    <tr key={doc.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <span className="text-gray-400 mr-2">
+                            <FileIcon className="h-4 w-4" />
+                          </span>
+                          <span className="text-sm text-gray-700 font-medium line-clamp-1">{doc.title}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{doc.type}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{doc.date}</td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={doc.status} />
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {doc.insights !== null ? doc.insights : "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-3 text-gray-400">
+                          <button className="hover:text-gray-700" title="Visualizar">
+                            <EyeIcon className="h-5 w-5" />
+                          </button>
+                          <button className="hover:text-gray-700" title="Baixar">
+                            <Download className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="border-t border-gray-200 px-6 py-3 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Mostrando 6 de 24 registros
               </div>
-              <Input 
-                placeholder="Pesquisar por título ou conteúdo..." 
-                className="pl-10 pr-4 py-2 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <div className="flex space-x-1">
+                <button 
+                  className="px-3 py-1 rounded border border-gray-300 text-sm text-gray-600 hover:bg-gray-50"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                >
+                  Anterior
+                </button>
+                <button 
+                  className={`px-3 py-1 rounded text-sm ${currentPage === 1 ? 'bg-[#9F85FF] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                  onClick={() => setCurrentPage(1)}
+                >
+                  1
+                </button>
+                <button 
+                  className={`px-3 py-1 rounded text-sm ${currentPage === 2 ? 'bg-[#9F85FF] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                  onClick={() => setCurrentPage(2)}
+                >
+                  2
+                </button>
+                <button 
+                  className={`px-3 py-1 rounded text-sm ${currentPage === 3 ? 'bg-[#9F85FF] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                  onClick={() => setCurrentPage(3)}
+                >
+                  3
+                </button>
+                <button 
+                  className="px-3 py-1 rounded border border-gray-300 text-sm text-gray-600 hover:bg-gray-50"
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  Próxima
+                </button>
+              </div>
             </div>
-            <div className="flex items-center">
-              <button className="flex items-center text-gray-600 hover:text-gray-800">
-                <Filter className="h-4 w-4 mr-2" />
-                <span>Todos os tipos</span>
-                <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Document Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sampleDocuments.map(doc => (
-              <DocumentCard
-                key={doc.id}
-                type={doc.type}
-                title={doc.title}
-                date={doc.date}
-                description={doc.description}
-              />
-            ))}
           </div>
         </main>
       </div>

@@ -181,7 +181,7 @@ export default function Dashboard() {
             icon={<History className="h-5 w-5" />}
             label="Histórico"
             active={activeSection === "history"}
-            onClick={() => setActiveSection("history")}
+            onClick={() => window.location.href = "/historico"}
           />
           <SidebarLink
             icon={<BarChart className="h-5 w-5" />}
