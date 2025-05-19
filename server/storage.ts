@@ -312,6 +312,9 @@ export class DatabaseStorage implements IStorage {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + daysAhead);
     
+    const todayStr = today.toISOString().split('T')[0];
+    const futureDateStr = futureDate.toISOString().split('T')[0];
+    
     return await db
       .select()
       .from(deadlines)
@@ -319,8 +322,8 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(deadlines.userId, userId),
           eq(deadlines.completed, false),
-          gte(deadlines.dueDate, today),
-          lte(deadlines.dueDate, futureDate)
+          sql`${deadlines.dueDate} >= ${todayStr}`,
+          sql`${deadlines.dueDate} <= ${futureDateStr}`
         )
       )
       .orderBy(deadlines.dueDate);
@@ -400,6 +403,9 @@ export class DatabaseStorage implements IStorage {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 14); // próximos 14 dias
     
+    const todayStr = today.toISOString().split('T')[0];
+    const futureDateStr = futureDate.toISOString().split('T')[0];
+    
     const pendingDeadlines = await db
       .select()
       .from(deadlines)
@@ -407,8 +413,8 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(deadlines.userId, userId),
           eq(deadlines.completed, false),
-          gte(deadlines.dueDate, today),
-          lte(deadlines.dueDate, futureDate)
+          sql`${deadlines.dueDate} >= ${todayStr}`,
+          sql`${deadlines.dueDate} <= ${futureDateStr}`
         )
       );
     

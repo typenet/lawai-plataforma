@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import * as aiService from "./ai-service";
 import aiRoutes from "./routes/ai";
+import clientRoutes from "./routes/clients";
+import caseRoutes from "./routes/cases";
+import deadlineRoutes from "./routes/deadlines";
 import { 
   analyzeDocument, 
   legalSearch, 
@@ -97,6 +100,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Rotas de IA
   app.use('/api/ai', aiRoutes);
+  
+  // Rotas de clientes, casos e prazos
+  app.use('/api/clients', clientRoutes);
+  app.use('/api/cases', caseRoutes);
+  app.use('/api/deadlines', deadlineRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
