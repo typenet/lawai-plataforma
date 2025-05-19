@@ -169,7 +169,7 @@ export default function Dashboard() {
             icon={<PlusCircle className="h-5 w-5" />}
             label="Novo documento"
             active={activeSection === "newDocument"}
-            onClick={() => setActiveSection("newDocument")}
+            onClick={() => window.location.href = "/novo-documento"}
           />
           <SidebarLink
             icon={<FileText className="h-5 w-5" />}
