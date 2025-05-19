@@ -1,0 +1,89 @@
+import {
+  pgTable,
+  text,
+  varchar,
+  json,
+  timestamp,
+  jsonb,
+  index,
+  boolean
+} from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Session storage table.
+// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table.
+// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Subscriptions table
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  planId: varchar("plan_id").notNull(), // basic, professional, enterprise
+  status: varchar("status").notNull(), // active, canceled, expired
+  createdAt: timestamp("created_at").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+// Searches table
+export const searches = pgTable("searches", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  query: text("query").notNull(),
+  sources: json("sources").notNull(), // { jurisprudence: true, doctrine: true, legislation: true }
+  results: json("results"), // Array of results from the AI
+  createdAt: timestamp("created_at").notNull(),
+});
+
+// Documents table
+export const documents = pgTable("documents", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  fileType: varchar("file_type").notNull(), // pdf, doc, docx
+  fileInfo: varchar("file_info"), // Size, pages, etc.
+  filePath: varchar("file_path"), // Path to the file
+  analysis: text("analysis"), // JSON string with analysis results
+  status: varchar("status").notNull(), // complete, issues_found, incomplete
+  createdAt: timestamp("created_at").notNull(),
+});
+
+// Schema for inserting a new user
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+
+// Schema for subscription
+export const insertSubscriptionSchema = createInsertSchema(subscriptions);
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+
+// Schema for searches
+export const insertSearchSchema = createInsertSchema(searches);
+export type InsertSearch = z.infer<typeof insertSearchSchema>;
+export type Search = typeof searches.$inferSelect;
+
+// Schema for documents
+export const insertDocumentSchema = createInsertSchema(documents);
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;

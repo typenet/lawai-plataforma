@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Custom colors for JurisIA */
+  --navy: 210 67% 18%;
+  --navy-light: 210 41% 31%;
+  --navy-lighter: 210 34% 37%;
+  --gold: 42 77% 59%;
+  --gold-light: 42 63% 71%;
+  --gold-dark: 42 58% 53%;
+  --neutral-lightest: 220 33% 97%;
+  --neutral-light: 220 14% 92%;
+  --neutral-medium: 214 12% 65%;
+  --neutral-dark: 215 17% 27%;
+  
+  /* Chart colors */
+  --chart-1: var(--navy);
+  --chart-2: var(--gold);
+  --chart-3: 210 40% 50%;
+  --chart-4: 42 60% 65%;
+  --chart-5: 210 30% 60%;
+  
+  /* Sidebar colors */
+  --sidebar-background: var(--navy);
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: var(--gold);
+  --sidebar-primary-foreground: var(--navy);
+  --sidebar-accent: 210 20% 40%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 210 30% 25%;
+  --sidebar-ring: var(--gold);
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+  
+  /* Custom colors for JurisIA (dark mode) */
+  --navy: 210 60% 30%;
+  --navy-light: 210 40% 40%;
+  --navy-lighter: 210 35% 45%;
+  --gold: 42 80% 65%;
+  --gold-light: 42 65% 75%;
+  --gold-dark: 42 60% 55%;
+  --neutral-lightest: 220 15% 15%;
+  --neutral-light: 220 10% 20%;
+  --neutral-medium: 214 15% 60%;
+  --neutral-dark: 215 10% 85%;
+  
+  /* Chart colors (dark mode) */
+  --chart-1: var(--navy);
+  --chart-2: var(--gold);
+  --chart-3: 210 40% 60%;
+  --chart-4: 42 60% 70%;
+  --chart-5: 210 30% 70%;
+  
+  /* Sidebar colors (dark mode) */
+  --sidebar-background: 240 10% 10%;
+  --sidebar-foreground: 0 0% 95%;
+  --sidebar-primary: var(--gold);
+  --sidebar-primary-foreground: 240 10% 10%;
+  --sidebar-accent: 210 20% 50%;
+  --sidebar-accent-foreground: 0 0% 95%;
+  --sidebar-border: 210 15% 20%;
+  --sidebar-ring: var(--gold);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
