@@ -454,6 +454,168 @@ export default function ClientsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Modal para editar cliente */}
+      <Dialog open={isEditClientOpen} onOpenChange={setIsEditClientOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+            <DialogDescription>Atualize os dados do cliente abaixo.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="name">Nome Completo *</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="documentType">Tipo de Documento *</Label>
+                  <Select
+                    value={formData.documentType}
+                    onValueChange={(value) => handleSelectChange("documentType", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tipo de Documento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CPF">CPF</SelectItem>
+                      <SelectItem value="CNPJ">CNPJ</SelectItem>
+                      <SelectItem value="RG">RG</SelectItem>
+                      <SelectItem value="OAB">OAB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="documentNumber">Número do Documento *</Label>
+                  <Input
+                    id="documentNumber"
+                    name="documentNumber"
+                    value={formData.documentNumber}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="address">Endereço</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">Cidade</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">Estado</Label>
+                  <Select
+                    value={formData.state}
+                    onValueChange={(value) => handleSelectChange("state", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AC">AC</SelectItem>
+                      <SelectItem value="AL">AL</SelectItem>
+                      <SelectItem value="AP">AP</SelectItem>
+                      <SelectItem value="AM">AM</SelectItem>
+                      <SelectItem value="BA">BA</SelectItem>
+                      <SelectItem value="CE">CE</SelectItem>
+                      <SelectItem value="DF">DF</SelectItem>
+                      <SelectItem value="ES">ES</SelectItem>
+                      <SelectItem value="GO">GO</SelectItem>
+                      <SelectItem value="MA">MA</SelectItem>
+                      <SelectItem value="MT">MT</SelectItem>
+                      <SelectItem value="MS">MS</SelectItem>
+                      <SelectItem value="MG">MG</SelectItem>
+                      <SelectItem value="PA">PA</SelectItem>
+                      <SelectItem value="PB">PB</SelectItem>
+                      <SelectItem value="PR">PR</SelectItem>
+                      <SelectItem value="PE">PE</SelectItem>
+                      <SelectItem value="PI">PI</SelectItem>
+                      <SelectItem value="RJ">RJ</SelectItem>
+                      <SelectItem value="RN">RN</SelectItem>
+                      <SelectItem value="RS">RS</SelectItem>
+                      <SelectItem value="RO">RO</SelectItem>
+                      <SelectItem value="RR">RR</SelectItem>
+                      <SelectItem value="SC">SC</SelectItem>
+                      <SelectItem value="SP">SP</SelectItem>
+                      <SelectItem value="SE">SE</SelectItem>
+                      <SelectItem value="TO">TO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="notes">Observações</Label>
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  className="min-h-[100px]"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditClientOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={editClientMutation.isPending}>
+                {editClientMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Atualizar Cliente
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Diálogo de confirmação de exclusão */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
