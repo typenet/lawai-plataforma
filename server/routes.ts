@@ -18,14 +18,14 @@ import { ptBR } from "date-fns/locale";
 // Setup multer for file uploads
 const upload = multer({
   storage: multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: function (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) {
       const uploadDir = path.join(process.cwd(), "uploads");
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
       cb(null, uploadDir);
     },
-    filename: function (req, file, cb) {
+    filename: function (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) {
       const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
       const ext = path.extname(file.originalname);
       cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
@@ -34,7 +34,7 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const allowedMimes = [
       'application/pdf',
       'application/msword',
@@ -204,7 +204,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Format the results
       const formattedResults = userSearches.flatMap(search => {
         // Each search might have multiple results, so we flatten them
-        return (search.results || []).map((result: any, index: number) => ({
+        const results = search.results || [];
+        return (Array.isArray(results) ? results : []).map((result: any, index: number) => ({
           id: `${search.id}-${index}`,
           title: result.title,
           summary: result.summary,

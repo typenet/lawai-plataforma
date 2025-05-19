@@ -148,8 +148,9 @@ export class DatabaseStorage implements IStorage {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    const [searchCountResult] = await db
-      .select({ count: searches.id.count() })
+    // Recuperar e contar pesquisas do usuário nos últimos 30 dias
+    const userSearches = await db
+      .select()
       .from(searches)
       .where(
         and(
@@ -158,8 +159,9 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    const [documentsCountResult] = await db
-      .select({ count: documents.id.count() })
+    // Recuperar e contar documentos do usuário nos últimos 30 dias
+    const userDocuments = await db
+      .select()
       .from(documents)
       .where(
         and(
@@ -168,9 +170,9 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    // Calculate plan usage (mock calculation for now)
-    const searchCount = Number(searchCountResult?.count || 0);
-    const documentsCount = Number(documentsCountResult?.count || 0);
+    // Calcular a contagem usando o comprimento dos arrays
+    const searchCount = userSearches.length;
+    const documentsCount = userDocuments.length;
     
     // Get user's subscription to determine the plan limits
     const subscription = await this.getUserSubscription(userId);
