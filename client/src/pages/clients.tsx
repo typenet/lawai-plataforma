@@ -147,7 +147,12 @@ export default function ClientsPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Clientes</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => window.location.href = "/dashboard"}>
+            Voltar
+          </Button>
+          <h1 className="text-3xl font-bold">Clientes</h1>
+        </div>
         <Button onClick={() => setIsAddClientOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Novo Cliente
         </Button>
