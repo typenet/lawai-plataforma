@@ -41,32 +41,41 @@ export default function DeadlinesPage() {
   });
   
   // Consultar prazos pendentes
-  const { data: pendingDeadlines, isLoading: isPendingLoading } = useQuery({
+  const { data: pendingDeadlinesData, isLoading: isPendingLoading } = useQuery({
     queryKey: ["/api/deadlines/pending"],
     enabled: isAuthenticated,
   });
   
+  const pendingDeadlines = pendingDeadlinesData?.deadlines || [];
+  
   // Consultar todos os prazos
-  const { data: allDeadlines, isLoading: isAllDeadlinesLoading } = useQuery({
+  const { data: allDeadlinesData, isLoading: isAllDeadlinesLoading } = useQuery({
     queryKey: ["/api/deadlines"],
     enabled: isAuthenticated,
   });
   
+  const allDeadlines = allDeadlinesData?.deadlines || [];
+  
   // Consultar casos para o select de criação de prazo
-  const { data: cases, isLoading: isCasesLoading } = useQuery({
+  const { data: casesData, isLoading: isCasesLoading } = useQuery({
     queryKey: ["/api/cases"],
     enabled: isAuthenticated,
   });
+  
+  const cases = casesData?.cases || [];
 
   // Adicionar um novo prazo
   const addDeadlineMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/deadlines", {
+      return fetch("/api/deadlines", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
+      }).then(res => {
+        if (!res.ok) throw new Error("Falha ao adicionar prazo");
+        return res.json();
       });
     },
     onSuccess: () => {
@@ -91,8 +100,11 @@ export default function DeadlinesPage() {
   // Marcar prazo como concluído
   const completeDeadlineMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/deadlines/${id}/complete`, {
+      return fetch(`/api/deadlines/${id}/complete`, {
         method: "PATCH",
+      }).then(res => {
+        if (!res.ok) throw new Error("Falha ao concluir prazo");
+        return res.json();
       });
     },
     onSuccess: () => {
@@ -115,8 +127,11 @@ export default function DeadlinesPage() {
   // Excluir um prazo
   const deleteDeadlineMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/deadlines/${id}`, {
+      return fetch(`/api/deadlines/${id}`, {
         method: "DELETE",
+      }).then(res => {
+        if (!res.ok) throw new Error("Falha ao excluir prazo");
+        return res.json();
       });
     },
     onSuccess: () => {

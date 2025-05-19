@@ -36,19 +36,24 @@ export default function ClientsPage() {
     notes: "",
   });
 
-  const { data: clients, isLoading } = useQuery({
+  const { data: clientsData, isLoading } = useQuery({
     queryKey: ["/api/clients"],
     enabled: isAuthenticated,
   });
+  
+  const clients = clientsData?.clients || [];
 
   const addClientMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/clients", {
+      return fetch("/api/clients", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
+      }).then(res => {
+        if (!res.ok) throw new Error("Falha ao adicionar cliente");
+        return res.json();
       });
     },
     onSuccess: () => {
@@ -71,8 +76,11 @@ export default function ClientsPage() {
 
   const deleteClientMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/clients/${id}`, {
+      return fetch(`/api/clients/${id}`, {
         method: "DELETE",
+      }).then(res => {
+        if (!res.ok) throw new Error("Falha ao excluir cliente");
+        return res.json();
       });
     },
     onSuccess: () => {
