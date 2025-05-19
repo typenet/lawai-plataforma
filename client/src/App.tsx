@@ -8,7 +8,7 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
-import FloatingAIButton from "@/components/ai-assistant/floating-ai-button";
+import SimplifiedFloatingButton from "@/components/ai-assistant/simplified-floating-button";
 
 function Router() {
   return (
@@ -27,7 +27,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
-        <FloatingAIButton />
+        <SimplifiedFloatingButton />
       </TooltipProvider>
     </QueryClientProvider>
   );

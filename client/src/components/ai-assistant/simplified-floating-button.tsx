@@ -1,0 +1,158 @@
+import { useState } from "react";
+import { Bot, X, Send, User, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+export default function SimplifiedFloatingButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([
+    { role: "assistant", content: "Olá! Sou a assistente virtual da JurisIA. Como posso ajudar você hoje?" }
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const toggleAssistant = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+
+    // Adicionar mensagem do usuário ao histórico
+    setChatHistory([...chatHistory, { role: "user", content: message }]);
+    setMessage("");
+    setIsTyping(true);
+
+    // Simular resposta da IA
+    setTimeout(() => {
+      const aiResponses = {
+        pesquisa: "Posso ajudar você a encontrar jurisprudência, doutrina ou legislação sobre qualquer tópico jurídico. Basta me dizer qual assunto você está pesquisando.",
+        documento: "Posso analisar seus documentos jurídicos, identificar problemas potenciais e sugerir melhorias. Você pode fazer upload de contratos, petições ou outros documentos para análise.",
+        prazo: "Para calcular prazos processuais, preciso saber a data inicial, o tipo de processo e o tribunal. Posso ajudar com cálculos precisos para você não perder nenhum prazo.",
+        default: "Estou aqui para ajudar com pesquisas jurídicas, análise de documentos, cálculo de prazos e muito mais. Como posso auxiliar você especificamente hoje?",
+      };
+      
+      let responseContent = aiResponses.default;
+      
+      // Identificar palavras-chave na mensagem do usuário
+      const lowerInput = message.toLowerCase();
+      if (lowerInput.includes("pesquisa") || lowerInput.includes("encontrar") || lowerInput.includes("buscar")) {
+        responseContent = aiResponses.pesquisa;
+      } else if (lowerInput.includes("documento") || lowerInput.includes("contrato") || lowerInput.includes("petição")) {
+        responseContent = aiResponses.documento;
+      } else if (lowerInput.includes("prazo") || lowerInput.includes("data") || lowerInput.includes("processo")) {
+        responseContent = aiResponses.prazo;
+      }
+
+      setChatHistory(prev => [...prev, { role: "assistant", content: responseContent }]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  return (
+    <>
+      {/* Botão flutuante */}
+      <Button
+        onClick={toggleAssistant}
+        className={`fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg flex items-center justify-center p-0 z-50 transition-all duration-300 ${
+          isOpen ? "bg-red-500 hover:bg-red-600" : "bg-[#0E2C4B] hover:bg-[#173E66]"
+        }`}
+        aria-label={isOpen ? "Fechar assistente" : "Abrir assistente IA"}
+      >
+        {isOpen ? (
+          <X className="h-6 w-6" />
+        ) : (
+          <Bot className="h-6 w-6" />
+        )}
+      </Button>
+
+      {/* Chat Dialog */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 w-[350px] sm:w-[400px] bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col overflow-hidden z-50">
+          {/* Header */}
+          <div className="bg-[#0E2C4B] text-white p-4 flex justify-between items-center">
+            <div className="flex items-center">
+              <Bot className="h-5 w-5 mr-2" />
+              <h3 className="font-semibold">Assistente Jurídico IA</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-white hover:bg-[#173E66]"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Chat Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "350px" }}>
+            {chatHistory.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`flex max-w-[80%] ${
+                    msg.role === "user" 
+                      ? "bg-[#0E2C4B] text-white rounded-l-xl rounded-tr-xl" 
+                      : "bg-gray-100 text-gray-800 rounded-r-xl rounded-tl-xl"
+                  } p-3`}
+                >
+                  <div className="mr-2 mt-1">
+                    {msg.role === "user" ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm">{msg.content}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-500 rounded-r-xl rounded-tl-xl p-3">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "100ms" }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "200ms" }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Input Area */}
+          <div className="border-t p-3">
+            <div className="flex space-x-2">
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Digite uma mensagem..."
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleSendMessage}
+                disabled={!message.trim()}
+                size="icon"
+                className="bg-[#0E2C4B] hover:bg-[#173E66]"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mt-2 text-xs text-center text-gray-400">
+              Assistente IA para auxílio jurídico
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
