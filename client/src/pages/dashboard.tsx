@@ -2,23 +2,22 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import StatsCard from "@/components/dashboard/stats-card";
-import DashboardTabs from "@/components/dashboard/dashboard-tabs";
-import { Search, FileText, Clock, Star, Zap, Archive, BarChart } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, FileText, Clock, Upload, BarChart, Home, PlusCircle, History, 
+  Users, Settings, HelpCircle, LogOut, File, Calendar, MessageSquare, Bell, LayoutGrid } from "lucide-react";
 import { DashboardStats } from "@/lib/types";
 import { useABTest } from "@/hooks/useABTest";
 
 export default function Dashboard() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const [location, setLocation] = useState<string>("");
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [_, navigate] = useLocation();
   const { toast } = useToast();
-  const { variant, isVariantA, isVariantB } = useABTest({
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const { variant } = useABTest({
     testId: "dashboard_layout",
-    defaultVariant: "A"
+    defaultVariant: "B"
   });
 
   const { data: statsData, isLoading: statsLoading } = useQuery<DashboardStats>({
@@ -27,7 +26,6 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    // Wait for auth to load, then redirect if not authenticated
     if (!authLoading && !isAuthenticated) {
       toast({
         title: "Acesso negado",
@@ -40,195 +38,319 @@ export default function Dashboard() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-xl text-neutral-dark">Carregando...</h2>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#9F85FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl text-gray-700">Carregando...</h2>
+        </div>
       </div>
     );
   }
 
+  // Componente de link de menu lateral
+  const SidebarLink = ({ icon, label, active, onClick }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void }) => (
+    <button
+      onClick={onClick}
+      className={`flex items-center w-full py-3 px-4 rounded-md text-left transition-colors ${
+        active 
+          ? "bg-[#EAE5FF] text-[#9F85FF]" 
+          : "text-gray-600 hover:bg-gray-100"
+      }`}
+    >
+      <div className={`mr-3 ${active ? "text-[#9F85FF]" : "text-gray-500"}`}>
+        {icon}
+      </div>
+      <span className="font-medium">{label}</span>
+    </button>
+  );
+
+  // Componente de card de estatística
+  const StatCard = ({ 
+    icon, 
+    value, 
+    label, 
+    iconColor, 
+    iconBg,
+    percentage
+  }: { 
+    icon: React.ReactNode, 
+    value: string | number, 
+    label: string, 
+    iconColor: string,
+    iconBg: string,
+    percentage?: string 
+  }) => (
+    <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+      <div className="flex items-center">
+        <div className={`p-3 rounded-lg mr-4 ${iconBg}`}>
+          {icon}
+        </div>
+        <div>
+          <div className="flex items-baseline">
+            <div className="text-2xl font-bold">{value}</div>
+            {percentage && (
+              <div className="ml-2 text-xs text-green-500">{percentage}</div>
+            )}
+          </div>
+          <div className="text-sm text-gray-500">{label}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Componente de documento recente
+  const DocumentItem = ({ 
+    icon, 
+    title, 
+    date, 
+    description,
+    documentType
+  }: { 
+    icon: React.ReactNode, 
+    title: string, 
+    date: string,
+    description: string,
+    documentType: string
+  }) => (
+    <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+      <div className="flex items-start mb-3">
+        <div className="p-2 mr-2 text-[#9F85FF]">
+          {icon}
+        </div>
+        <div className="flex-1">
+          <div className="flex justify-between items-start mb-1">
+            <div className="text-xs text-gray-500 flex items-center">
+              <Calendar className="h-3 w-3 mr-1" />
+              {date}
+            </div>
+          </div>
+          <div className="text-sm font-semibold text-gray-800 mb-1">{documentType}</div>
+          <div className="text-base font-semibold text-gray-900">{title}</div>
+          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{description}</p>
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <button className="text-sm text-gray-500 hover:text-gray-700">Visualizar</button>
+        <button className="text-sm text-[#9F85FF] hover:text-[#8A6EF3]">Ver análise</button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-grow">
-        {isVariantA ? (
-          // Variante A - Layout Original
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-semibold text-navy">Dashboard</h1>
-            </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Stats Cards */}
-              <div className="py-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  <StatsCard
-                    icon={<Search className="h-5 w-5" />}
-                    title="Pesquisas Realizadas"
-                    value={statsLoading ? "..." : statsData?.searchCount || 0}
-                    linkText="Ver histórico"
-                    linkHref="/historico-pesquisas"
-                  />
-                  
-                  <StatsCard
-                    icon={<FileText className="h-5 w-5" />}
-                    title="Documentos Analisados"
-                    value={statsLoading ? "..." : statsData?.documentsCount || 0}
-                    linkText="Ver documentos"
-                    linkHref="/documentos"
-                  />
-                  
-                  <StatsCard
-                    icon={<Clock className="h-5 w-5" />}
-                    title="Uso do Plano"
-                    value={statsLoading ? "..." : `${statsData?.planUsagePercent || 0}%`}
-                    linkText="Detalhes do plano"
-                    linkHref="/plano"
-                  />
-                  
-                  <StatsCard
-                    icon={<Star className="h-5 w-5" />}
-                    title="Plano Atual"
-                    value={statsLoading ? "..." : statsData?.currentPlanName || "Nenhum"}
-                    linkText="Fazer upgrade"
-                    linkHref="/planos"
-                    iconBgColor="bg-gold"
-                  />
-                </div>
-              </div>
-              
-              {/* Tabs with content */}
-              <DashboardTabs />
-            </div>
+    <div className="min-h-screen bg-[#F8F9FC] flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-sm z-10 flex flex-col border-r border-gray-200">
+        {/* Logo */}
+        <div className="flex items-center p-4 border-b border-gray-200">
+          <div className="flex items-center bg-[#9F85FF] rounded-md p-1.5 mr-2">
+            <svg className="h-6 w-auto text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.8L20 9v6l-8 4-8-4V9l8-4.2z" />
+              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
           </div>
-        ) : (
-          // Variante B - Layout Alternativo com menu lateral
-          <div className="flex">
-            {/* Sidebar Menu - Versão B */}
-            <div className="hidden md:flex w-64 bg-navy text-white flex-col min-h-screen">
-              <div className="p-6 border-b border-navy-light">
-                <h2 className="text-xl font-semibold">JurisIA</h2>
-                <p className="text-sm text-white/60 mt-1">Dashboard Jurídico</p>
-              </div>
-              <nav className="flex-1 p-4">
-                <div className="space-y-1">
-                  <a href="#" className="flex items-center px-4 py-3 bg-navy-light rounded-md text-white group">
-                    <Search className="h-5 w-5 mr-3 text-white/60 group-hover:text-white" />
-                    <span>Pesquisas</span>
-                  </a>
-                  <a href="#" className="flex items-center px-4 py-3 rounded-md text-white/80 hover:bg-navy-light group">
-                    <FileText className="h-5 w-5 mr-3 text-white/60 group-hover:text-white" />
-                    <span>Documentos</span>
-                  </a>
-                  <a href="#" className="flex items-center px-4 py-3 rounded-md text-white/80 hover:bg-navy-light group">
-                    <Zap className="h-5 w-5 mr-3 text-white/60 group-hover:text-white" />
-                    <span>Assistente IA</span>
-                  </a>
-                  <a href="#" className="flex items-center px-4 py-3 rounded-md text-white/80 hover:bg-navy-light group">
-                    <Archive className="h-5 w-5 mr-3 text-white/60 group-hover:text-white" />
-                    <span>Biblioteca</span>
-                  </a>
-                  <a href="#" className="flex items-center px-4 py-3 rounded-md text-white/80 hover:bg-navy-light group">
-                    <BarChart className="h-5 w-5 mr-3 text-white/60 group-hover:text-white" />
-                    <span>Estatísticas</span>
-                  </a>
-                </div>
-              </nav>
-              <div className="p-4 border-t border-navy-light">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <img 
-                      className="h-10 w-10 rounded-full"
-                      src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff"
-                      alt="Usuário"
-                    />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium">Minha Conta</p>
-                    <a href="/api/logout" className="text-xs text-white/60 hover:text-white">Sair</a>
-                  </div>
-                </div>
-              </div>
+          <span className="text-xl font-bold text-[#9F85FF]">LawAI</span>
+          
+          <button className="ml-auto text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Menu */}
+        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+          <SidebarLink
+            icon={<Home className="h-5 w-5" />}
+            label="Dashboard"
+            active={activeSection === "dashboard"}
+            onClick={() => setActiveSection("dashboard")}
+          />
+          <SidebarLink
+            icon={<PlusCircle className="h-5 w-5" />}
+            label="Novo documento"
+            active={activeSection === "newDocument"}
+            onClick={() => setActiveSection("newDocument")}
+          />
+          <SidebarLink
+            icon={<FileText className="h-5 w-5" />}
+            label="Documentos"
+            active={activeSection === "documents"}
+            onClick={() => setActiveSection("documents")}
+          />
+          <SidebarLink
+            icon={<History className="h-5 w-5" />}
+            label="Histórico"
+            active={activeSection === "history"}
+            onClick={() => setActiveSection("history")}
+          />
+          <SidebarLink
+            icon={<BarChart className="h-5 w-5" />}
+            label="Analytics"
+            active={activeSection === "analytics"}
+            onClick={() => setActiveSection("analytics")}
+          />
+          <SidebarLink
+            icon={<Users className="h-5 w-5" />}
+            label="Clientes"
+            active={activeSection === "clients"}
+            onClick={() => setActiveSection("clients")}
+          />
+          <SidebarLink
+            icon={<HelpCircle className="h-5 w-5" />}
+            label="Ajuda"
+            active={activeSection === "help"}
+            onClick={() => setActiveSection("help")}
+          />
+          <SidebarLink
+            icon={<Settings className="h-5 w-5" />}
+            label="Configurações"
+            active={activeSection === "settings"}
+            onClick={() => setActiveSection("settings")}
+          />
+        </nav>
+
+        {/* Logout */}
+        <div className="p-4 border-t border-gray-200">
+          <button 
+            onClick={() => window.location.href = "/api/logout"}
+            className="flex items-center w-full py-2 px-4 rounded-md text-left text-gray-600 hover:bg-gray-100"
+          >
+            <LogOut className="h-5 w-5 mr-3 text-gray-500" />
+            <span className="font-medium">Sair</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200 py-4 px-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <h1 className="text-xl font-semibold text-gray-800">LawAI Insight</h1>
             </div>
-            
-            {/* Main Content - Versão B */}
-            <div className="flex-1">
-              <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
-                  <h1 className="text-2xl font-bold text-navy">Olá, {statsData?.firstName || "Advogado"}</h1>
-                  <button className="bg-navy hover:bg-navy-light text-white font-medium py-2 px-4 rounded-lg">
-                    Nova Pesquisa
-                  </button>
+            <div className="flex space-x-4 items-center">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
                 </div>
-                
-                {/* Stats Summary - Versão compacta */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center">
-                      <div className="mr-4 bg-blue-50 p-3 rounded-full">
-                        <Search className="h-7 w-7 text-blue-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">{statsLoading ? "..." : statsData?.searchCount || 0}</h3>
-                        <p className="text-sm text-gray-500">Pesquisas</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center">
-                      <div className="mr-4 bg-indigo-50 p-3 rounded-full">
-                        <FileText className="h-7 w-7 text-indigo-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">{statsLoading ? "..." : statsData?.documentsCount || 0}</h3>
-                        <p className="text-sm text-gray-500">Documentos</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center">
-                      <div className="mr-4 bg-green-50 p-3 rounded-full">
-                        <Clock className="h-7 w-7 text-green-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">{statsLoading ? "..." : `${statsData?.planUsagePercent || 0}%`}</h3>
-                        <p className="text-sm text-gray-500">Uso do Plano</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center">
-                      <div className="mr-4 bg-yellow-50 p-3 rounded-full">
-                        <Star className="h-7 w-7 text-yellow-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">{statsLoading ? "..." : statsData?.currentPlanName || "Básico"}</h3>
-                        <p className="text-sm text-gray-500">Plano Atual</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Tabs with content */}
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <h2 className="text-xl font-semibold mb-4">Atividades Recentes</h2>
-                  <DashboardTabs />
+                <Input 
+                  placeholder="Pesquisar documentos..." 
+                  className="pl-10 pr-4 py-2 w-64 bg-gray-50"
+                />
+              </div>
+              <button className="p-2 text-gray-500 hover:text-gray-700">
+                <MessageSquare className="h-5 w-5" />
+              </button>
+              <button className="p-2 text-gray-500 hover:text-gray-700 relative">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-full bg-[#9F85FF] text-white flex items-center justify-center">
+                  <span className="font-medium text-sm">MA</span>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </main>
-      
-      {isVariantA && <Footer />}
+        </header>
+
+        {/* Dashboard Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6 flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-800">Visão Geral</h2>
+            <Button className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white">
+              <span>Nova análise</span>
+            </Button>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              icon={<FileText className="h-6 w-6 text-indigo-500" />}
+              value="24"
+              label="Total de Documentos"
+              iconColor="text-indigo-500"
+              iconBg="bg-indigo-100"
+            />
+            <StatCard
+              icon={<LayoutGrid className="h-6 w-6 text-purple-500" />}
+              value="18"
+              label="Documentos Analisados"
+              iconColor="text-purple-500"
+              iconBg="bg-purple-100"
+              percentage="75% do total"
+            />
+            <StatCard
+              icon={<Upload className="h-6 w-6 text-emerald-500" />}
+              value="6"
+              label="Uploads Esta Semana"
+              iconColor="text-emerald-500"
+              iconBg="bg-emerald-100"
+              percentage="+20%"
+            />
+            <StatCard
+              icon={<Clock className="h-6 w-6 text-amber-500" />}
+              value="2:15"
+              label="Tempo Médio de Análise"
+              iconColor="text-amber-500"
+              iconBg="bg-amber-100"
+            />
+          </div>
+
+          {/* Documents and Quick Access */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Recent Documents - 2/3 width */}
+            <div className="lg:col-span-2">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Documentos Recentes</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DocumentItem
+                  icon={<FileText className="h-5 w-5" />}
+                  title="Contrato de Prestação de Serviços de Advocacia"
+                  date="12/05/2025"
+                  description="Este contrato estabelece as condições para prestação de serviços advocatícios."
+                  documentType="Contrato"
+                />
+                <DocumentItem
+                  icon={<FileText className="h-5 w-5" />}
+                  title="Petição Inicial - Processo nº 0123456-78.2025.8.26.0100"
+                  date="10/05/2025"
+                  description="Trata-se de petição inicial referente ao processo de reparação de danos."
+                  documentType="Petição"
+                />
+              </div>
+            </div>
+
+            {/* Quick Access - 1/3 width */}
+            <div className="lg:col-span-1">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Acesso Rápido</h3>
+              </div>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-gray-200">
+                  <h4 className="font-medium text-gray-700">Modelos Sugeridos</h4>
+                </div>
+                <ul className="divide-y divide-gray-200">
+                  <li className="flex items-center p-3 hover:bg-gray-50">
+                    <File className="h-5 w-5 mr-3 text-[#9F85FF]" />
+                    <span className="text-gray-700">Contrato de Honorários</span>
+                  </li>
+                  <li className="flex items-center p-3 hover:bg-gray-50">
+                    <File className="h-5 w-5 mr-3 text-[#9F85FF]" />
+                    <span className="text-gray-700">Procuração Ad Judicia</span>
+                  </li>
+                  <li className="flex items-center p-3 hover:bg-gray-50">
+                    <File className="h-5 w-5 mr-3 text-[#9F85FF]" />
+                    <span className="text-gray-700">Petição de Juntada de Documentos</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
