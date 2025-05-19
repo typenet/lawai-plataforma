@@ -4,7 +4,7 @@ import { log } from './vite';
 
 // Configuração básica para a API DeepSeek
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_API_URL = 'https://api.deepseek.ai/v1';
+const DEEPSEEK_API_URL = 'https://api-alpha.deepseek.com/v1';
 
 // Log para debug
 log(`Usando a API DeepSeek com URL: ${DEEPSEEK_API_URL}`, 'deepseek');
