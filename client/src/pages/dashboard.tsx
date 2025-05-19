@@ -6,7 +6,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, FileText, Clock, Upload, BarChart, Home, PlusCircle, History, 
-  Users, Settings, HelpCircle, LogOut, File, Calendar, MessageSquare, Bell, LayoutGrid } from "lucide-react";
+  Users, Settings, HelpCircle, LogOut, File, Calendar, MessageSquare, Bell, LayoutGrid, CalendarClock } from "lucide-react";
 import { DashboardStats } from "@/lib/types";
 import { useABTest } from "@/hooks/useABTest";
 
@@ -193,7 +193,13 @@ export default function Dashboard() {
             icon={<Users className="h-5 w-5" />}
             label="Clientes"
             active={activeSection === "clients"}
-            onClick={() => setActiveSection("clients")}
+            onClick={() => window.location.href = "/clientes"}
+          />
+          <SidebarLink
+            icon={<CalendarClock className="h-5 w-5" />}
+            label="Prazos Processuais"
+            active={activeSection === "deadlines"}
+            onClick={() => window.location.href = "/prazos"}
           />
           <SidebarLink
             icon={<HelpCircle className="h-5 w-5" />}
