@@ -177,7 +177,7 @@ export default function ClientsPage() {
             <CardDescription>Gerenciar clientes e processos</CardDescription>
           </CardHeader>
           <CardContent>
-            {clients?.clients?.length > 0 ? (
+            {clients.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -189,7 +189,7 @@ export default function ClientsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {clients.clients.map((client: Client) => (
+                  {clients.map((client: Client) => (
                     <TableRow key={client.id}>
                       <TableCell className="font-medium">{client.name}</TableCell>
                       <TableCell>
