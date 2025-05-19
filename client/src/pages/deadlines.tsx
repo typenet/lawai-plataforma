@@ -283,7 +283,7 @@ export default function DeadlinesPage() {
                 <CardDescription>Prazos que requerem sua atenção nos próximos dias</CardDescription>
               </CardHeader>
               <CardContent>
-                {pendingDeadlines?.deadlines?.length > 0 ? (
+                {pendingDeadlines.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -296,7 +296,7 @@ export default function DeadlinesPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pendingDeadlines.deadlines.map((deadline: Deadline) => (
+                      {pendingDeadlines.map((deadline: Deadline) => (
                         <TableRow key={deadline.id}>
                           <TableCell>{getDeadlineStatus(deadline)}</TableCell>
                           <TableCell className="font-medium">{deadline.title}</TableCell>
@@ -347,7 +347,7 @@ export default function DeadlinesPage() {
                 <CardDescription>Lista completa de prazos processuais</CardDescription>
               </CardHeader>
               <CardContent>
-                {allDeadlines?.deadlines?.length > 0 ? (
+                {allDeadlines.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -360,7 +360,7 @@ export default function DeadlinesPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {allDeadlines.deadlines.map((deadline: Deadline) => (
+                      {allDeadlines.map((deadline: Deadline) => (
                         <TableRow key={deadline.id} className={deadline.completed ? "opacity-60" : ""}>
                           <TableCell>{getDeadlineStatus(deadline)}</TableCell>
                           <TableCell className="font-medium">{deadline.title}</TableCell>

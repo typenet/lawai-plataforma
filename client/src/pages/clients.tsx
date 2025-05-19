@@ -203,15 +203,17 @@ export default function ClientsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="icon" asChild>
-                            <Link href={`/clients/${client.id}`}>
-                              <Edit className="h-4 w-4" />
-                            </Link>
+                          <Button variant="outline" size="icon" onClick={() => toast({
+                            title: "Editar cliente",
+                            description: "Funcionalidade em desenvolvimento"
+                          })}>
+                            <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="icon" asChild>
-                            <Link href={`/cases/new?clientId=${client.id}`}>
-                              <FilePlus className="h-4 w-4" />
-                            </Link>
+                          <Button variant="outline" size="icon" onClick={() => toast({
+                            title: "Adicionar processo",
+                            description: "Funcionalidade em desenvolvimento"
+                          })}>
+                            <FilePlus className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="icon" onClick={() => confirmDelete(client.id)}>
                             <Trash2 className="h-4 w-4 text-red-500" />
