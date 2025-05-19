@@ -6,7 +6,10 @@ import {
   timestamp,
   jsonb,
   index,
-  boolean
+  boolean,
+  date,
+  integer,
+  serial
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -87,3 +90,71 @@ export type Search = typeof searches.$inferSelect;
 export const insertDocumentSchema = createInsertSchema(documents);
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documents.$inferSelect;
+
+// Clients table
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  documentType: varchar("document_type", { length: 20 }).notNull(), // CPF, CNPJ
+  documentNumber: varchar("document_number", { length: 20 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 20 }),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Casos/Processos table
+export const cases = pgTable("cases", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  clientId: integer("client_id").notNull().references(() => clients.id),
+  caseNumber: varchar("case_number", { length: 50 }).notNull(),
+  caseType: varchar("case_type", { length: 100 }).notNull(), // Civil, Criminal, Trabalhista, etc.
+  court: varchar("court", { length: 100 }), // Tribunal onde tramita
+  subject: text("subject").notNull(), // Assunto/Tema principal
+  description: text("description"),
+  status: varchar("status", { length: 30 }).notNull(), // Ativo, Arquivado, Encerrado, etc.
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Prazos Processuais table
+export const deadlines = pgTable("deadlines", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  caseId: integer("case_id").notNull().references(() => cases.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  dueDate: date("due_date").notNull(),
+  completed: boolean("completed").default(false).notNull(),
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"), // high, medium, low
+  notifyDaysBefore: integer("notify_days_before").default(3),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Schema for clients
+export const insertClientSchema = createInsertSchema(clients, {
+  documentNumber: z.string().min(11).max(18),
+  email: z.string().email().optional().nullable(),
+  phone: z.string().min(10).max(20).optional().nullable(),
+});
+export type InsertClient = z.infer<typeof insertClientSchema>;
+export type Client = typeof clients.$inferSelect;
+
+// Schema for cases
+export const insertCaseSchema = createInsertSchema(cases);
+export type InsertCase = z.infer<typeof insertCaseSchema>;
+export type Case = typeof cases.$inferSelect;
+
+// Schema for deadlines
+export const insertDeadlineSchema = createInsertSchema(deadlines);
+export type InsertDeadline = z.infer<typeof insertDeadlineSchema>;
+export type Deadline = typeof deadlines.$inferSelect;
