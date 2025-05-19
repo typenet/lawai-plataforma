@@ -33,7 +33,7 @@ export default function Home() {
                     {isAuthenticated ? "Acessar Dashboard" : "Começar Agora"}
                   </Button>
                   <Link href="#recursos">
-                    <Button variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg">
+                    <Button variant="outline" className="border-white bg-white/20 text-white hover:bg-white/30 px-8 py-3 text-lg">
                       Explorar Recursos
                     </Button>
                   </Link>
