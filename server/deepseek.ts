@@ -4,7 +4,10 @@ import { log } from './vite';
 
 // Configuração básica para a API DeepSeek
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_API_URL = 'https://api.deepseek-ai.com/v1';
+const DEEPSEEK_API_URL = 'https://api.deepseek.ai/v1';
+
+// Log para debug
+log(`Usando a API DeepSeek com URL: ${DEEPSEEK_API_URL}`, 'deepseek');
 
 // Verifica se a chave da API está definida
 if (!DEEPSEEK_API_KEY) {
@@ -178,17 +181,30 @@ export async function generateDocument(documentType: string, parameters: any): P
  */
 export async function testConnection(): Promise<boolean> {
   try {
-    // Apenas uma chamada simples para verificar se a API está respondendo
-    const response = await deepseekClient.post('/chat/completions', {
-      model: 'deepseek-chat',
-      messages: [
-        { role: 'user', content: 'Test connection' }
-      ],
-      max_tokens: 10
-    });
+    // Registra a tentativa de conexão para debug
+    log('Iniciando teste de conexão com a API DeepSeek...', 'deepseek');
+
+    // Mostra a URL e a presença da chave (mas não a chave em si)
+    log(`URL: ${DEEPSEEK_API_URL}, API Key present: ${!!DEEPSEEK_API_KEY}`, 'deepseek');
+    
+    // Teste simples para verificar a conexão com a API
+    const response = await deepseekClient.get('/models');
+    
+    // Registra a resposta para debug
+    log(`Resposta do teste de conexão: Status ${response.status}`, 'deepseek');
     
     return response.status === 200;
   } catch (error) {
+    // Registra o erro completo para debug
+    if (error.response) {
+      log(`Erro de resposta: Status ${error.response.status}`, 'deepseek');
+      log(`Dados da resposta: ${JSON.stringify(error.response.data)}`, 'deepseek');
+    } else if (error.request) {
+      log('Erro na requisição: Sem resposta recebida', 'deepseek');
+    } else {
+      log(`Erro ao configurar requisição: ${error.message}`, 'deepseek');
+    }
+    
     log(`Erro ao testar conexão com API DeepSeek: ${error.message}`, 'deepseek');
     return false;
   }
