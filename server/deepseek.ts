@@ -3,8 +3,9 @@ import axios from 'axios';
 import { log } from './vite';
 
 // Configuração básica para a API DeepSeek
+// DeepSeek API é compatível com formato OpenAI
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_API_URL = 'https://api-alpha.deepseek.com/v1';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com';
 
 // Log para debug
 log(`Usando a API DeepSeek com URL: ${DEEPSEEK_API_URL}`, 'deepseek');
