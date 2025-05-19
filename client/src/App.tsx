@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 import NewDocument from "@/pages/new-document";
 import Documents from "@/pages/documents";
 import HistoryPage from "@/pages/history";
+import AnalyticsPage from "@/pages/analytics";
 import SimplifiedFloatingButton from "@/components/ai-assistant/simplified-floating-button";
 
 function Router() {
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/novo-documento" component={NewDocument} />
       <Route path="/documentos" component={Documents} />
       <Route path="/historico" component={HistoryPage} />
+      <Route path="/analytics" component={AnalyticsPage} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
