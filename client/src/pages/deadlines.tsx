@@ -448,8 +448,8 @@ export default function DeadlinesPage() {
                     <SelectContent>
                       {isCasesLoading ? (
                         <SelectItem value="loading" disabled>Carregando...</SelectItem>
-                      ) : cases?.cases?.length > 0 ? (
-                        cases.cases.map((caseItem: Case) => (
+                      ) : cases.length > 0 ? (
+                        cases.map((caseItem: Case) => (
                           <SelectItem key={caseItem.id} value={caseItem.id.toString()}>
                             {caseItem.caseNumber} ({caseItem.subject})
                           </SelectItem>
