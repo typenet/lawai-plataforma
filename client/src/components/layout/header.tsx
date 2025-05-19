@@ -30,11 +30,13 @@ export default function Header() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <svg className="h-8 w-auto text-navy" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.8L20 9v6l-8 4-8-4V9l8-4.2z" />
-                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-              </svg>
-              <span className="ml-2 text-xl font-bold text-navy">JurisIA</span>
+              <div className="flex items-center bg-[#9F85FF] rounded-md p-1.5">
+                <svg className="h-6 w-auto text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.8L20 9v6l-8 4-8-4V9l8-4.2z" />
+                  <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+              </div>
+              <span className="ml-2 text-xl font-bold text-[#9F85FF]">LawAI</span>
             </div>
           </div>
           
@@ -66,7 +68,7 @@ export default function Header() {
                 {!isAuthenticated ? (
                   <Button 
                     variant="default" 
-                    className="bg-[#0E2C4B] hover:bg-[#173E66] text-white font-medium"
+                    className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white font-medium"
                     onClick={() => window.location.href = "/api/login"}
                   >
                     Entrar

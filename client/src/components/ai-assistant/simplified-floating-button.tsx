@@ -55,7 +55,7 @@ export default function SimplifiedFloatingButton() {
       <Button
         onClick={toggleAssistant}
         className={`fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg flex items-center justify-center p-0 z-50 transition-all duration-300 ${
-          isOpen ? "bg-red-500 hover:bg-red-600" : "bg-[#0E2C4B] hover:bg-[#173E66]"
+          isOpen ? "bg-red-500 hover:bg-red-600" : "bg-[#9F85FF] hover:bg-[#8A6EF3]"
         }`}
         aria-label={isOpen ? "Fechar assistente" : "Abrir assistente IA"}
       >
@@ -70,15 +70,15 @@ export default function SimplifiedFloatingButton() {
       {isOpen && (
         <div className="fixed bottom-24 right-6 w-[350px] sm:w-[400px] bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col overflow-hidden z-50">
           {/* Header */}
-          <div className="bg-[#0E2C4B] text-white p-4 flex justify-between items-center">
+          <div className="bg-[#9F85FF] text-white p-4 flex justify-between items-center">
             <div className="flex items-center">
               <Bot className="h-5 w-5 mr-2" />
-              <h3 className="font-semibold">Assistente Jurídico IA</h3>
+              <h3 className="font-semibold">Assistente LawAI</h3>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-white hover:bg-[#173E66]"
+              className="h-8 w-8 text-white hover:bg-[#8A6EF3]"
               onClick={() => setIsOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -97,8 +97,8 @@ export default function SimplifiedFloatingButton() {
                 <div
                   className={`flex max-w-[80%] ${
                     msg.role === "user" 
-                      ? "bg-[#0E2C4B] text-white rounded-l-xl rounded-tr-xl" 
-                      : "bg-gray-100 text-gray-800 rounded-r-xl rounded-tl-xl"
+                      ? "bg-[#9F85FF] text-white rounded-l-xl rounded-tr-xl" 
+                      : "bg-[#F8F6FF] text-gray-800 rounded-r-xl rounded-tl-xl"
                   } p-3`}
                 >
                   <div className="mr-2 mt-1">
@@ -142,7 +142,7 @@ export default function SimplifiedFloatingButton() {
                 onClick={handleSendMessage}
                 disabled={!message.trim()}
                 size="icon"
-                className="bg-[#0E2C4B] hover:bg-[#173E66]"
+                className="bg-[#9F85FF] hover:bg-[#8A6EF3]"
               >
                 <Send className="h-4 w-4" />
               </Button>

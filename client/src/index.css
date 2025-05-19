@@ -24,17 +24,18 @@
   --ring: 20 14.3% 4.1%;
   --radius: 0.5rem;
   
-  /* Custom colors for JurisIA */
-  --navy: 210 67% 18%;
-  --navy-light: 210 41% 31%;
-  --navy-lighter: 210 34% 37%;
-  --gold: 42 77% 59%;
-  --gold-light: 42 63% 71%;
-  --gold-dark: 42 58% 53%;
-  --neutral-lightest: 220 33% 97%;
-  --neutral-light: 220 14% 92%;
-  --neutral-medium: 214 12% 65%;
-  --neutral-dark: 215 17% 27%;
+  /* Custom colors for LawAI - Nova paleta */
+  --navy: 254 63% 65%; /* Nova cor principal (roxo/lilás) */
+  --navy-light: 254 63% 75%;
+  --navy-lighter: 254 63% 85%;
+  --navy-dark: 254 63% 55%;
+  --gold: 254 80% 85%;
+  --gold-light: 254 80% 95%;
+  --gold-dark: 254 80% 75%;
+  --neutral-lightest: 240 33% 97%;
+  --neutral-light: 240 14% 92%;
+  --neutral-medium: 240 12% 65%;
+  --neutral-dark: 240 17% 27%;
   
   /* Chart colors */
   --chart-1: var(--navy);

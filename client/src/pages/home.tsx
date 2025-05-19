@@ -20,38 +20,41 @@ export default function Home() {
       <main className="flex-grow">
         {/* Hero Section - Variante A/B */}
         {isVariantA ? (
-          // Variante A - Layout Original
-          <div className="bg-[#0E2C4B] text-white py-12 md:py-20">
+          // Variante A - Layout Original com nova paleta de cores
+          <div className="bg-[#F8F6FF] text-[#28283E] py-12 md:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
                 <div>
-                  <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white">
-                    Inteligência Artificial para Advogados
+                  <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-[#28283E]">
+                    Inteligência Artificial
                   </h1>
-                  <p className="mt-6 text-xl max-w-3xl text-white">
-                    Otimize seu trabalho jurídico com nossa plataforma de IA especializada. 
-                    Economize tempo, reduza custos e melhore a qualidade do seu serviço.
+                  <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-[#9F85FF] mt-2">
+                    para Profissionais do Direito
+                  </h2>
+                  <p className="mt-6 text-xl max-w-3xl text-[#4A4A65]">
+                    Aumente sua produtividade com análise automática de documentos jurídicos,
+                    extraia informações relevantes e receba recomendações inteligentes.
                   </p>
                   <div className="mt-8 flex flex-wrap gap-4">
                     <Button 
-                      className="bg-gold hover:bg-gold-dark text-navy font-medium px-8 py-3 text-lg"
+                      className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white font-medium px-8 py-3 text-lg"
                       onClick={() => window.location.href = isAuthenticated ? "/dashboard" : "/api/login"}
                     >
                       {isAuthenticated ? "Acessar Dashboard" : "Começar Agora"}
                     </Button>
                     <Link href="#recursos">
-                      <Button variant="outline" className="border-white bg-white/20 text-white hover:bg-white/30 px-8 py-3 text-lg">
+                      <Button variant="outline" className="border-[#9F85FF] text-[#9F85FF] hover:bg-[#F8F6FF]/80 px-8 py-3 text-lg">
                         Explorar Recursos
                       </Button>
                     </Link>
                   </div>
                 </div>
                 <div className="mt-12 lg:mt-0">
-                  <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+                  <div className="bg-white rounded-lg p-6 shadow-lg">
                     <img 
                       src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
                       alt="Documentos jurídicos com IA" 
-                      className="w-full rounded-lg shadow-lg"
+                      className="w-full rounded-lg"
                     />
                   </div>
                 </div>
@@ -59,8 +62,8 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          // Variante B - Layout Alternativo
-          <div className="bg-gradient-to-br from-[#0a1d33] to-[#183c66] text-white py-16 md:py-24">
+          // Variante B - Layout Alternativo com nova paleta
+          <div className="bg-gradient-to-br from-[#9F85FF] to-[#BDA8FF] text-white py-16 md:py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white mb-6">
