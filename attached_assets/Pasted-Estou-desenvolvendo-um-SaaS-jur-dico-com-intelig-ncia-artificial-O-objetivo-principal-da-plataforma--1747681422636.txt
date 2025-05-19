@@ -1,0 +1,57 @@
+Estou desenvolvendo um SaaS jurídico com inteligência artificial O objetivo principal da plataforma é auxiliar advogados e escritórios de advocacia nas seguintes frentes:
+
+1. Cadastro de Usuários
+O sistema permitirá que novos usuários se cadastrem com nome, e-mail e senha.
+
+A autenticação será gerenciada por um serviço seguro com suporte a login com e-mail e senha.
+
+Haverá também recuperação de senha e confirmação de e-mail.
+
+2. Escolha de Planos Mensais
+O usuário poderá escolher entre diferentes planos mensais, com recursos progressivos como:
+
+Acesso a pesquisas jurídicas básicas.
+
+Sugestão automática de documentos (petições, contratos, procurações etc.).
+
+Análise de arquivos (PDF e Word).
+
+Consultas mais avançadas e em maior volume nos planos superiores.
+
+3. Funcionalidade de Pesquisa Jurídica com IA
+O sistema permitirá ao usuário:
+
+Pesquisar sobre processos judiciais e jurisprudência.
+
+Obter recomendações automáticas de documentos jurídicos com base no tema.
+
+Buscar conteúdo relevante em sites jurídicos na internet.
+
+4. Upload de Documentos para Análise
+O usuário poderá fazer upload de arquivos em PDF ou Word.
+
+A IA fará análise semântica dos arquivos e oferecerá:
+
+Resumo dos documentos.
+
+Recomendação de ações ou documentos relacionados.
+
+Identificação de pontos críticos no conteúdo (ex: ausência de cláusulas, dados incompletos etc.).
+
+5. Infraestrutura e Tecnologias
+O front-end será desenvolvido com React e Tailwind CSS, com possível uso de Next.js.
+
+O back-end utilizará Node.js ou Python, com Supabase como banco de dados e autenticação.
+
+Para a IA, será utilizada uma LLM especializada em linguagem jurídica com recursos de RAG (retrieval augmented generation).
+
+O sistema também usará embeddings vetoriais para recomendar documentos semelhantes.
+
+6. Funcionalidades Futuras
+Integração com gateway de pagamento (ex: Stripe, Mercado Pago ou Pagar.me) para automatizar a cobrança de planos.
+
+Histórico de pesquisas e documentos analisados.
+
+Assistente virtual por chat com IA treinada em base jurídica.
+
+Dashboard com estatísticas de uso e recomendações personalizadas.
