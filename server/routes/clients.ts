@@ -105,8 +105,67 @@ router.post('/', isAuthenticated, async (req: any, res) => {
   }
 });
 
-// Atualizar um cliente existente
+// Atualizar um cliente existente (suporta PUT e PATCH)
 router.put('/:id', isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.claims.sub;
+    const clientId = parseInt(req.params.id);
+    
+    if (isNaN(clientId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de cliente inválido'
+      });
+    }
+    
+    const existingClient = await storage.getClient(clientId);
+    
+    if (!existingClient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cliente não encontrado'
+      });
+    }
+    
+    // Verificar se o cliente pertence ao usuário atual
+    if (existingClient.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Acesso não autorizado a este cliente'
+      });
+    }
+    
+    // Validar dados da atualização
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date()
+    };
+    
+    const updatedClient = await storage.updateClient(clientId, updateData);
+    
+    res.json({
+      success: true,
+      client: updatedClient
+    });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Dados inválidos para atualização do cliente',
+        errors: error.errors
+      });
+    }
+    
+    console.error('Erro ao atualizar cliente:', error);
+    res.status(500).json({
+      success: false,
+      message: `Erro ao atualizar cliente: ${error.message || 'Erro desconhecido'}`
+    });
+  }
+});
+
+// Adicionar rota PATCH para suportar atualizações parciais
+router.patch('/:id', isAuthenticated, async (req: any, res) => {
   try {
     const userId = req.user.claims.sub;
     const clientId = parseInt(req.params.id);
