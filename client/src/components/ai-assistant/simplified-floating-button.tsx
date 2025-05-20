@@ -253,13 +253,34 @@ export default function SimplifiedFloatingButton() {
       
       // Identificar palavras-chave na mensagem do usuário
       const lowerInput = message.toLowerCase();
-      if (lowerInput.includes("pesquisa") || lowerInput.includes("encontrar") || lowerInput.includes("buscar")) {
-        responseContent = aiResponses.pesquisa;
-      } else if (lowerInput.includes("documento") || lowerInput.includes("contrato") || lowerInput.includes("petição")) {
-        responseContent = aiResponses.documento;
-      } else if (lowerInput.includes("prazo") || lowerInput.includes("data") || lowerInput.includes("processo")) {
-        responseContent = aiResponses.prazo;
-      } else if (lowerInput.includes("procuração") || lowerInput.includes("procuracao")) {
+      
+      // Verificar se é solicitação de contrato de locação
+      if (lowerInput.includes("contrato") && (lowerInput.includes("locação") || lowerInput.includes("locacao"))) {
+        // Mensagem de processamento
+        setChatHistory(prev => [
+          ...prev, 
+          { 
+            role: "assistant", 
+            content: "Posso gerar um contrato de locação. Clique no botão abaixo:"
+          }
+        ]);
+        
+        // Adicionar botão de ação após um pequeno delay
+        setTimeout(() => {
+          setChatHistory(prev => [
+            ...prev, 
+            { 
+              role: "action", 
+              content: "Monte um contrato de locação para o cliente de CPF 218320908-92"
+            }
+          ]);
+          setIsTyping(false);
+        }, 500);
+        
+        return;
+      }
+      // Verificar se é solicitação de procuração
+      else if (lowerInput.includes("procuração") || lowerInput.includes("procuracao")) {
         if (lowerInput.includes("21832") || lowerInput.includes("218320908") || 
             lowerInput.includes("cpf") || lowerInput.includes("cliente")) {
           
@@ -288,6 +309,14 @@ export default function SimplifiedFloatingButton() {
         } else {
           responseContent = "Para gerar uma procuração, preciso do CPF ou nome do cliente. Você pode me fornecer essas informações?";
         }
+      }
+      // Verificar outras palavras-chave
+      else if (lowerInput.includes("pesquisa") || lowerInput.includes("encontrar") || lowerInput.includes("buscar")) {
+        responseContent = aiResponses.pesquisa;
+      } else if (lowerInput.includes("documento") || lowerInput.includes("petição")) {
+        responseContent = aiResponses.documento;
+      } else if (lowerInput.includes("prazo") || lowerInput.includes("data") || lowerInput.includes("processo")) {
+        responseContent = aiResponses.prazo;
       }
 
       setChatHistory(prev => [...prev, { role: "assistant", content: responseContent }]);
@@ -345,20 +374,33 @@ export default function SimplifiedFloatingButton() {
                     <Button 
                       className="w-full bg-[#9F85FF] hover:bg-[#8A6EF3] text-white flex items-center justify-center p-3"
                       onClick={() => {
+                        console.log("Botão clicado:", msg.content);
+                        
+                        // Se for o botão específico de contrato de locação
+                        if (msg.content === "Monte um contrato de locação para o cliente de CPF 218320908-92") {
+                          console.log("Gerando contrato de locação específico");
+                          gerarContratoLocacaoPDF();
+                          return;
+                        }
+                        
                         // Se inclui locação, baixar um contrato de locação
                         if (msg.content.toLowerCase().includes("locação") || msg.content.toLowerCase().includes("locacao")) {
+                          console.log("Gerando contrato de locação");
                           gerarContratoLocacaoPDF();
                         } 
                         // Se inclui baixar, baixar o documento
                         else if (msg.content.includes("Baixar")) {
+                          console.log("Gerando procuração (baixar)");
                           gerarProcuracaoPDF();
                         }
                         // Para procuração
                         else if (msg.content.toLowerCase().includes("procuração") || msg.content.toLowerCase().includes("procuracao")) {
+                          console.log("Gerando procuração");
                           gerarProcuracaoPDF();
                         }
                         // Para qualquer outro tipo de documento
                         else {
+                          console.log("Gerando documento padrão (procuração)");
                           gerarProcuracaoPDF();
                         }
                       }}
