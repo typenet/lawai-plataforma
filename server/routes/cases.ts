@@ -25,6 +25,28 @@ router.get('/', isAuthenticated, async (req: any, res) => {
   }
 });
 
+// Obter opções de processos para dropdowns e seletores
+router.get('/options', isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.claims.sub;
+    const cases = await storage.getUserCases(userId);
+    
+    // Formatar os dados para o formato esperado pelo seletor
+    const options = cases.map((caseItem: any) => ({
+      id: caseItem.id,
+      label: `${caseItem.title || ''} (${caseItem.number || 'Sem número'})`,
+      value: caseItem.id.toString(),
+      clientName: caseItem.clientName || 'Cliente não especificado',
+      status: caseItem.status
+    }));
+    
+    res.json(options);
+  } catch (error: any) {
+    console.error('Erro ao buscar opções de processos:', error);
+    res.status(500).json([]);
+  }
+});
+
 // Buscar casos de um cliente específico
 router.get('/by-client/:clientId', isAuthenticated, async (req: any, res) => {
   try {

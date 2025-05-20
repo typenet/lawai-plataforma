@@ -82,19 +82,40 @@ async def create_deadline(
     Cria um novo prazo
     """
     try:
+        # Validar os dados recebidos
+        if not deadline_create.title or not deadline_create.title.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="O título do prazo é obrigatório"
+            )
+            
+        # Converter o id do caso para inteiro, se fornecido
+        case_id = None
+        if deadline_create.case_id:
+            try:
+                case_id = int(deadline_create.case_id)
+            except (ValueError, TypeError):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="ID de processo inválido"
+                )
+        
         # Usar o serviço para criar o prazo com validações
         deadline = DeadlineService.create_deadline(
             db=db,
-            user_id=current_user.id,
+            user_id=str(current_user.id),
             title=deadline_create.title,
             description=deadline_create.description,
             due_date=deadline_create.due_date,
-            case_id=deadline_create.case_id,
-            priority=deadline_create.priority
+            case_id=case_id,
+            priority=deadline_create.priority or "medium"
         )
+        
+        logger.info(f"Prazo criado com sucesso: {deadline.id}")
         return deadline
     except HTTPException as e:
         # Repassar exceções HTTP
+        logger.warning(f"Erro de validação ao criar prazo: {e.detail}")
         raise e
     except Exception as e:
         # Logar e transformar outras exceções
