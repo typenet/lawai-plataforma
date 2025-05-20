@@ -1,11 +1,56 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { getSessionConfig, devAuthMiddleware } from "./simpleAuth";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Configuração de sessão simplificada
+app.use(getSessionConfig());
+
+// Middleware de autenticação simplificada para desenvolvimento
+app.use(devAuthMiddleware);
+
+// Endpoint de autenticação para desenvolvimento
+app.get('/api/auth/user', (req, res) => {
+  // Usuário de teste para desenvolvimento
+  const mockUser = {
+    id: "999999",
+    email: "advogado@exemplo.com",
+    firstName: "Advogado",
+    lastName: "Exemplo",
+    profileImageUrl: "https://ui-avatars.com/api/?name=Advogado&background=9F85FF&color=fff",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    subscription: {
+      id: "sub_1",
+      planId: "professional",
+      status: "active",
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  };
+  res.json(mockUser);
+});
+
+// Endpoint para estatísticas de dashboard
+app.get('/api/dashboard/stats', (req, res) => {
+  const mockStats = {
+    searchCount: 24,
+    documentsCount: 15,
+    planUsagePercent: 65,
+    clientsCount: 8,
+    casesCount: 12,
+    pendingDeadlinesCount: 5,
+    currentPlanId: "professional",
+    currentPlanName: "Profissional"
+  };
+  res.json(mockStats);
+});
+
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -36,8 +81,10 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  const server = await registerRoutes(app);
+// Função principal para iniciar o servidor
+async function main() {
+  try {
+    const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

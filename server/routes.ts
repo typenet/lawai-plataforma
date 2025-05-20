@@ -95,8 +95,8 @@ const subscriptionUpdateSchema = z.object({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Não inicializar autenticação Replit em desenvolvimento
+  // para evitar problemas com login
   
   // Rotas de IA
   app.use('/api/ai', aiRoutes);

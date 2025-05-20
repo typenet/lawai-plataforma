@@ -244,7 +244,7 @@ export async function setupAuth(app: Express) {
     app.get("/api/logout", (req, res) => {
       req.logout(() => {
         try {
-          // Simplificado para evitar problemas com async/await
+          // Redirecionar para a página inicial
           res.redirect("/");
         } catch (error) {
           console.error("Erro ao fazer logout:", error);
