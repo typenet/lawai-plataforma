@@ -82,9 +82,15 @@ export default function SimplifiedFloatingButton() {
       // Criar um novo documento PDF
       const doc = new jsPDF();
       
-      // Configurar fonte e tamanho
+      // Adicionar marca d'água de fundo (texto claro)
+      doc.setFontSize(60);
+      doc.setTextColor(230, 230, 230);
+      doc.text("LAWAI", 105, 150, { align: "center" });
+      
+      // Configurar fonte e tamanho para o título
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
       
       // Título centralizado
       doc.text("PROCURAÇÃO", 105, 20, { align: "center" });
@@ -93,39 +99,47 @@ export default function SimplifiedFloatingButton() {
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
       
-      // Adicionar conteúdo com quebras de linha apropriadas
-      const linhasProcuracao = [
-        "",
-        "",
-        `OUTORGANTE: ${cliente.nome}, brasileira, portadora do CPF nº ${cliente.cpf},`,
-        `residente e domiciliada à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`,
-        "",
-        "OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado, inscrito na OAB/XX sob nº XXXXX,", 
-        "com escritório profissional localizado à [ENDEREÇO COMPLETO].",
-        "",
-        "PODERES: Por este instrumento particular de procuração, a outorgante nomeia e constitui o outorgado",
-        "como seu procurador, conferindo-lhe poderes para o foro em geral, com a cláusula \"ad judicia et extra\",",
-        "em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes",
-        "e defendê-la nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais",
-        "e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir,",
-        "firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente.",
-        "",
-        "",
-        `São Paulo, ${new Date().toLocaleDateString('pt-BR')}.`,
-        "",
-        "",
-        "",
-        "____________________________________",
-        `${cliente.nome}`,
-        `CPF: ${cliente.cpf}`
-      ];
+      // Configuração de página para A4
+      const pageWidth = doc.internal.pageSize.getWidth();
       
-      // Adicionar cada linha ao documento com espaçamento adequado
-      let y = 30;
-      for (const linha of linhasProcuracao) {
-        doc.text(linha, 20, y);
-        y += 8; // Espaçamento entre linhas
-      }
+      // Função para escrever parágrafos com quebra automática
+      const addParagraph = (text: string, startX: number, startY: number, maxWidth: number): number => {
+        const splitText = doc.splitTextToSize(text, maxWidth);
+        doc.text(splitText, startX, startY);
+        return startY + (splitText.length * 8);
+      };
+      
+      // Posição inicial
+      let posY = 40;
+      
+      // Adicionar os dados da procuração
+      posY = addParagraph(`OUTORGANTE: ${cliente.nome}, brasileira, portadora do CPF nº ${cliente.cpf}, residente e domiciliada à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`, 20, posY, pageWidth - 40);
+      
+      posY += 15;
+      
+      posY = addParagraph(`OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado, inscrito na OAB/XX sob nº XXXXX, com escritório profissional localizado à [ENDEREÇO COMPLETO].`, 20, posY, pageWidth - 40);
+      
+      posY += 15;
+      
+      const poderes = "PODERES: Por este instrumento particular de procuração, a outorgante nomeia e constitui o outorgado como seu procurador, conferindo-lhe poderes para o foro em geral, com a cláusula \"ad judicia et extra\", em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes e defendê-la nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente.";
+      
+      posY = addParagraph(poderes, 20, posY, pageWidth - 40);
+      
+      posY += 25;
+      
+      // Adicionar data
+      doc.text(`São Paulo, ${new Date().toLocaleDateString('pt-BR')}.`, 20, posY);
+      
+      posY += 40;
+      
+      // Adicionar assinatura
+      doc.text("____________________________________", 20, posY);
+      posY += 10;
+      doc.text(`${cliente.nome}`, 20, posY);
+      posY += 8;
+      doc.text(`CPF: ${cliente.cpf}`, 20, posY);
+      
+      // O código acima já adiciona todos os elementos do documento
       
       // Salvar o PDF com nome apropriado
       doc.save(`Procuracao_${cliente.nome.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
