@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { 
   FileText, 
@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   Download,
   Printer,
+  FileSearch,
   BarChart
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -99,23 +100,47 @@ export default function DocumentViewer() {
     navigate('/documentos');
   };
   
+  const handleViewAnalysis = () => {
+    if (documentId) {
+      navigate(`/analise-documento?id=${documentId}`);
+    }
+  };
+  
   const handlePrint = () => {
     window.print();
   };
   
-  // Determinar o tipo do documento com base no título
-  const getDocumentType = (title: string) => {
-    let type = "Documento";
-    if (title.toLowerCase().includes("contrato")) type = "Contrato";
-    else if (title.toLowerCase().includes("petição") || title.toLowerCase().includes("peticao")) type = "Petição";
-    else if (title.toLowerCase().includes("procuração") || title.toLowerCase().includes("procuracao")) type = "Procuração";
-    return type;
+  const handleDownload = () => {
+    if (!document || !document.content) {
+      toast({
+        title: "Erro ao baixar",
+        description: "Não foi possível gerar o download do documento.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Criar um blob e fazer o download
+    const blob = new Blob([document.content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${document.title || 'documento'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Download iniciado",
+      description: "O documento está sendo baixado.",
+    });
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
+    <div className="min-h-screen bg-[#F8F9FC] flex print:block">
+      {/* Sidebar - escondido ao imprimir */}
+      <div className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col print:hidden">
         <div className="p-4 border-b border-gray-200">
           <h1 className="text-xl font-bold text-[#9F85FF]">LawAI</h1>
         </div>
@@ -194,8 +219,8 @@ export default function DocumentViewer() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6">
+        {/* Header - escondido ao imprimir */}
+        <header className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 print:hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button className="text-gray-500 md:hidden mr-2">
@@ -217,13 +242,13 @@ export default function DocumentViewer() {
         </header>
 
         {/* Document Viewer Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 print:p-0">
           {isLoadingDocument ? (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-12 print:hidden">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9F85FF]"></div>
             </div>
           ) : !document ? (
-            <div className="bg-white p-8 rounded-lg border text-center">
+            <div className="bg-white p-8 rounded-lg border text-center print:hidden">
               <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-1">Documento não encontrado</h3>
               <p className="text-gray-500 mb-4">
@@ -238,83 +263,74 @@ export default function DocumentViewer() {
               </Button>
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-              {/* Document Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-[#9F85FF]">
-                        {getDocumentType(document.title)}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        Criado em: {new Date(document.createdAt).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                    <h1 className="text-2xl font-bold text-gray-800">{document.title}</h1>
-                    <p className="text-gray-600 mt-1">
-                      Cliente: {document.clientName || "Cliente não especificado"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="text-gray-600"
-                      onClick={handleBackToDocuments}
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      Voltar
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="text-gray-600"
-                      onClick={handlePrint}
-                    >
-                      <Printer className="mr-2 h-4 w-4" />
-                      Imprimir
-                    </Button>
-                    <Button 
-                      className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white"
-                      onClick={() => {
-                        // Opção para baixar - futuramente
-                        alert("Funcionalidade de download será implementada em breve.");
-                      }}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Baixar
-                    </Button>
-                  </div>
+            <div className="max-w-5xl mx-auto">
+              {/* Actions Bar - escondido ao imprimir */}
+              <div className="flex justify-between items-center mb-6 print:hidden">
+                <Button 
+                  variant="outline" 
+                  className="text-gray-600"
+                  onClick={handleBackToDocuments}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="text-gray-600"
+                    onClick={handlePrint}
+                  >
+                    <Printer className="mr-2 h-4 w-4" />
+                    Imprimir
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="text-gray-600"
+                    onClick={handleDownload}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Baixar
+                  </Button>
+                  <Button 
+                    className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white"
+                    onClick={handleViewAnalysis}
+                  >
+                    <FileSearch className="mr-2 h-4 w-4" />
+                    Ver análise
+                  </Button>
                 </div>
               </div>
               
               {/* Document Content */}
-              <div className="p-6">
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 font-mono text-sm whitespace-pre-wrap">
-                  {document.content || "Este documento não possui conteúdo."}
-                </div>
-              </div>
-              
-              {/* Document Metadata */}
-              <div className="border-t border-gray-200 p-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Informações adicionais</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Tipo de arquivo</p>
-                    <p className="text-sm font-medium">{document.fileType || "Texto"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Tamanho</p>
-                    <p className="text-sm font-medium">{document.fileInfo || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Status</p>
-                    <p className="text-sm font-medium">{document.status || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Cliente</p>
-                    <p className="text-sm font-medium">{document.clientName || "Cliente não especificado"}</p>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 print:border-0 print:shadow-none print:p-0">
+                {/* Document Metadata - Alguns campos escondidos ao imprimir */}
+                <div className="mb-6 print:mb-8">
+                  <div className="print:text-center">
+                    <h1 className="text-2xl font-bold text-gray-800 print:text-3xl">{document.title}</h1>
+                    <p className="text-gray-500 mt-1 print:hidden">
+                      Cliente: {document.clientName || "Cliente não especificado"}
+                    </p>
+                    <p className="text-gray-500 text-sm mt-1 print:hidden">
+                      {document.createdAgo || new Date(document.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
+                
+                {/* Document Text Content */}
+                {document.content ? (
+                  <div className="prose max-w-none">
+                    {document.content.split('\n').map((line, index) => (
+                      <p key={index} className={line.trim() === '' ? 'my-4' : 'my-2'}>
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-gray-500 print:hidden">
+                    <p>Conteúdo do documento não disponível.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

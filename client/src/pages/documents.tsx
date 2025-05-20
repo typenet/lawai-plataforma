@@ -70,9 +70,8 @@ const DocumentCard = ({ id, type, title, clientName, date, description }: Docume
           <button 
             className="text-sm text-[#9F85FF] hover:text-[#8A6EF3] flex items-center"
             onClick={() => {
-              // Mostrar análise
-              alert(`A análise do documento '${title}' seria exibida aqui. Atualmente temos: ${description}`);
-              console.log("Ver análise", id);
+              // Redirecionar para a página de análise de documento
+              window.location.href = `/analise-documento?id=${id}`;
             }}
           >
             <FileSearch className="h-3 w-3 mr-1" />

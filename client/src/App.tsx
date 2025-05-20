@@ -12,6 +12,7 @@ import NotFound from "@/pages/not-found";
 import NewDocument from "@/pages/new-document";
 import Documents from "@/pages/documents";
 import DocumentViewer from "@/pages/document-viewer";
+import DocumentAnalysis from "@/pages/document-analysis";
 import HistoryPage from "@/pages/history";
 import AnalyticsPage from "@/pages/analytics";
 import AITestPage from "@/pages/ai-test";
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/novo-documento" component={() => <ProtectedRoute component={NewDocument} />} />
       <Route path="/documentos" component={() => <ProtectedRoute component={Documents} />} />
       <Route path="/visualizar-documento" component={() => <ProtectedRoute component={DocumentViewer} />} />
+      <Route path="/analise-documento" component={() => <ProtectedRoute component={DocumentAnalysis} />} />
       <Route path="/historico" component={() => <ProtectedRoute component={HistoryPage} />} />
       <Route path="/analytics" component={() => <ProtectedRoute component={AnalyticsPage} />} />
       <Route path="/clientes" component={() => <ProtectedRoute component={ClientsPage} />} />
