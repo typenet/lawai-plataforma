@@ -84,14 +84,14 @@ export default function Header() {
                       <ChevronDown className="ml-1 h-4 w-4 text-gray-400" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <Link href="/perfil">
+                      <Link href="/dashboard">
                         <DropdownMenuItem className="cursor-pointer">
-                          Seu Perfil
+                          Dashboard
                         </DropdownMenuItem>
                       </Link>
-                      <Link href="/configuracoes">
+                      <Link href="/documentos">
                         <DropdownMenuItem className="cursor-pointer">
-                          Configurações
+                          Documentos
                         </DropdownMenuItem>
                       </Link>
                       <DropdownMenuSeparator />
@@ -161,14 +161,14 @@ export default function Header() {
                 </div>
               </div>
               <div className="mt-3 space-y-1">
-                <Link href="/perfil">
+                <Link href="/dashboard">
                   <span className="block px-4 py-2 text-base font-medium text-neutral-dark hover:text-navy hover:bg-neutral-lightest cursor-pointer">
-                    Seu Perfil
+                    Dashboard
                   </span>
                 </Link>
-                <Link href="/configuracoes">
+                <Link href="/documentos">
                   <span className="block px-4 py-2 text-base font-medium text-neutral-dark hover:text-navy hover:bg-neutral-lightest cursor-pointer">
-                    Configurações
+                    Documentos
                   </span>
                 </Link>
                 <a 
