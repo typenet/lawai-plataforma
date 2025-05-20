@@ -158,3 +158,20 @@ export type Case = typeof cases.$inferSelect;
 export const insertDeadlineSchema = createInsertSchema(deadlines);
 export type InsertDeadline = z.infer<typeof insertDeadlineSchema>;
 export type Deadline = typeof deadlines.$inferSelect;
+
+// Tabela de configurações do usuário
+export const userSettings = pgTable("user_settings", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  logoPath: varchar("logo_path"),
+  signaturePath: varchar("signature_path"),
+  address: text("address"),
+  oabNumber: varchar("oab_number"),
+  useWatermark: boolean("use_watermark").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserSettingsSchema = createInsertSchema(userSettings);
+export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
+export type UserSettings = typeof userSettings.$inferSelect;

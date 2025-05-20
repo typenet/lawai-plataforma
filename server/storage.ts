@@ -19,7 +19,10 @@ import {
   type InsertCase,
   deadlines,
   type Deadline,
-  type InsertDeadline
+  type InsertDeadline,
+  userSettings,
+  type UserSettings,
+  type InsertUserSettings
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, isNull, not, sql } from "drizzle-orm";
@@ -69,6 +72,11 @@ export interface IStorage {
   getPendingDeadlines(userId: string, daysAhead?: number): Promise<Deadline[]>;
   completeDeadline(id: number): Promise<Deadline>;
   deleteDeadline(id: number): Promise<boolean>;
+  
+  // User Settings operations
+  getUserSettings(userId: string): Promise<UserSettings | undefined>;
+  createUserSettings(settings: InsertUserSettings): Promise<UserSettings>;
+  updateUserSettings(id: string, updates: Partial<UserSettings>): Promise<UserSettings>;
   
   // Usage statistics
   getUserStats(userId: string): Promise<{
@@ -457,5 +465,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 }
+
+
 
 export const storage = new DatabaseStorage();
