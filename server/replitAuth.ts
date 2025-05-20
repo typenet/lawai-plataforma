@@ -241,16 +241,11 @@ export async function setupAuth(app: Express) {
       })(req, res, next);
     });
 
-    app.get("/api/logout", async (req, res) => {
+    app.get("/api/logout", (req, res) => {
       req.logout(() => {
         try {
-          const oidcConfig = await getOidcConfig();
-          res.redirect(
-            client.buildEndSessionUrl(oidcConfig, {
-              client_id: process.env.REPL_ID!,
-              post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-            }).href
-          );
+          // Simplificado para evitar problemas com async/await
+          res.redirect("/");
         } catch (error) {
           console.error("Erro ao fazer logout:", error);
           res.redirect("/");

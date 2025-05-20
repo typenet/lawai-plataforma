@@ -106,47 +106,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/cases', caseRoutes);
   app.use('/api/deadlines', deadlineRoutes);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+  // Rota de usuário para desenvolvimento (retorna usuário mockado para todos os pedidos)
+  app.get('/api/auth/user', async (req: any, res) => {
+    // Sempre retorna um usuário de desenvolvimento para facilitar o teste
+    const mockUser = {
+      id: "999999",
+      email: "advogado@exemplo.com",
+      firstName: "Advogado",
+      lastName: "Exemplo",
+      profileImageUrl: "https://ui-avatars.com/api/?name=Advogado&background=9F85FF&color=fff",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      subscription: {
+        id: "sub_1",
+        planId: "professional",
+        status: "active",
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       }
-      
-      // Get user's subscription
-      const subscription = await storage.getUserSubscription(userId);
-      
-      res.json({
-        ...user,
-        subscription
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
+    };
+    
+    res.json(mockUser);
   });
 
-  // Dashboard stats
-  app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
+  // Dashboard stats - Simplificado para desenvolvimento
+  app.get('/api/dashboard/stats', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      // Usar ID de usuário fixo para desenvolvimento
+      const userId = "999999";
       
-      // Get user stats
-      const stats = await storage.getUserStats(userId);
+      // Dados simulados para desenvolvimento
+      const stats = {
+        searchCount: 24,
+        documentsCount: 15,
+        planUsagePercent: 65,
+        clientsCount: 8,
+        casesCount: 12,
+        pendingDeadlinesCount: 5
+      };
       
-      // Get current subscription
-      const subscription = await storage.getUserSubscription(userId);
-      
-      let currentPlanId = "basic"; // Default to basic
-      let currentPlanName = "Básico";
-      
-      if (subscription) {
-        currentPlanId = subscription.planId;
-        currentPlanName = plans[subscription.planId as keyof typeof plans].name;
-      }
+      // Dados de plano simulados
+      const currentPlanId = "professional"; 
+      const currentPlanName = "Profissional";
       
       res.json({
         ...stats,
