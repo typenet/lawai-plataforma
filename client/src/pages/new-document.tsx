@@ -36,8 +36,21 @@ export default function NewDocument() {
   const [documentText, setDocumentText] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   
+  // Interface para as configurações do usuário
+  interface UserSettings {
+    id: string;
+    userId: string;
+    logoPath: string | null;
+    signaturePath: string | null;
+    address: string | null;
+    oabNumber: string | null;
+    useWatermark: boolean;
+    logoUrl?: string | null;
+    signatureUrl?: string | null;
+  }
+  
   // Buscar configurações do usuário
-  const { data: settings, isLoading: isLoadingSettings } = useQuery({
+  const { data: settings, isLoading: isLoadingSettings } = useQuery<UserSettings>({
     queryKey: ['/api/settings'],
     retry: false
   });
@@ -87,16 +100,20 @@ export default function NewDocument() {
   // Função para salvar o documento
   const saveDocumentMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('/api/documents', 'POST', {
-        title: selectedTemplate === 'contrato-honorarios' 
-          ? 'Contrato de Honorários' 
-          : selectedTemplate === 'procuracao'
-          ? 'Procuração Ad Judicia'
-          : 'Petição de Juntada de Documentos',
-        content: documentText,
-        type: selectedTemplate,
-        status: 'draft'
-      });
+      return await apiRequest(
+        'POST', 
+        '/api/documents', 
+        {
+          title: selectedTemplate === 'contrato-honorarios' 
+            ? 'Contrato de Honorários' 
+            : selectedTemplate === 'procuracao'
+            ? 'Procuração Ad Judicia'
+            : 'Petição de Juntada de Documentos',
+          content: documentText,
+          type: selectedTemplate,
+          status: 'draft'
+        }
+      );
     },
     onSuccess: () => {
       toast({
@@ -134,9 +151,10 @@ export default function NewDocument() {
       ? `${user.firstName} ${user.lastName}` 
       : "[NOME DO ADVOGADO]";
       
-    const oabNumero = settings?.oabNumber || "[NÚMERO OAB]";
+    // Verificar se settings existe antes de tentar acessar suas propriedades
+    const oabNumero = settings ? settings.oabNumber || "[NÚMERO OAB]" : "[NÚMERO OAB]";
     const estado = "SP"; // Estado padrão, pode ser personalizado no futuro
-    const endereco = settings?.address || "[ENDEREÇO DO ESCRITÓRIO]";
+    const endereco = settings ? settings.address || "[ENDEREÇO DO ESCRITÓRIO]" : "[ENDEREÇO DO ESCRITÓRIO]";
     
     if (selectedTemplate === 'contrato-honorarios') {
       modelContent = `CONTRATO DE HONORÁRIOS ADVOCATÍCIOS

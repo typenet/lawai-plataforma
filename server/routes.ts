@@ -353,6 +353,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para criar novo documento
+  app.post('/api/documents', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validar dados do documento
+      if (!req.body.title || !req.body.content) {
+        return res.status(400).json({ message: "Título e conteúdo são obrigatórios" });
+      }
+      
+      // Gerar ID único para o documento
+      const documentId = uuidv4();
+      
+      // Salvar documento no banco de dados
+      await storage.createDocument({
+        id: documentId,
+        userId,
+        title: req.body.title,
+        content: req.body.content, 
+        fileType: "text/plain",
+        fileInfo: null,
+        status: req.body.status || 'draft',
+        analysis: JSON.stringify({ summary: "Documento criado a partir de modelo" }),
+        createdAt: new Date()
+      });
+      
+      res.json({ 
+        success: true, 
+        documentId,
+        message: "Documento salvo com sucesso"
+      });
+    } catch (error) {
+      console.error("Erro ao salvar documento:", error);
+      res.status(500).json({ message: "Falha ao salvar o documento" });
+    }
+  });
+
+  // Rota para listar documentos
   app.get('/api/documents', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
