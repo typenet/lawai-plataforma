@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, Link } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,6 +34,13 @@ export default function NewDocument() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [editorVisible, setEditorVisible] = useState(false);
   const [documentText, setDocumentText] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Buscar configurações do usuário
+  const { data: settings, isLoading: isLoadingSettings } = useQuery({
+    queryKey: ['/api/settings'],
+    retry: false
+  });
   
   // Verificar parâmetros na URL para pré-selecionar modelo
   useEffect(() => {
@@ -75,16 +84,69 @@ export default function NewDocument() {
     );
   }
 
+  // Função para salvar o documento
+  const saveDocumentMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('/api/documents', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: selectedTemplate === 'contrato-honorarios' 
+            ? 'Contrato de Honorários' 
+            : selectedTemplate === 'procuracao'
+            ? 'Procuração Ad Judicia'
+            : 'Petição de Juntada de Documentos',
+          content: documentText,
+          type: selectedTemplate,
+          status: 'draft'
+        })
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Documento salvo',
+        description: 'O documento foi salvo com sucesso.',
+      });
+      setIsSaving(false);
+      
+      // Redirecionar para a lista de documentos
+      navigate('/documentos');
+    },
+    onError: (error) => {
+      console.error('Erro ao salvar documento:', error);
+      toast({
+        title: 'Erro ao salvar',
+        description: 'Ocorreu um erro ao salvar o documento. Tente novamente.',
+        variant: 'destructive',
+      });
+      setIsSaving(false);
+    },
+  });
+
+  // Função para salvar o documento
+  const handleSaveDocument = () => {
+    setIsSaving(true);
+    saveDocumentMutation.mutate();
+  };
+
   // Função para carregar o texto do modelo selecionado
   const loadTemplateText = () => {
     let modelContent = "";
+    
+    // Obter dados do advogado das configurações
+    const advogadoNome = user?.firstName && user?.lastName 
+      ? `${user.firstName} ${user.lastName}` 
+      : "[NOME DO ADVOGADO]";
+      
+    const oabNumero = settings?.oabNumber || "[NÚMERO OAB]";
+    const estado = "SP"; // Estado padrão, pode ser personalizado no futuro
+    const endereco = settings?.address || "[ENDEREÇO DO ESCRITÓRIO]";
     
     if (selectedTemplate === 'contrato-honorarios') {
       modelContent = `CONTRATO DE HONORÁRIOS ADVOCATÍCIOS
 
 CONTRATANTE: [NOME DO CLIENTE], [NACIONALIDADE], [ESTADO CIVIL], [PROFISSÃO], inscrito no CPF sob nº [CPF], portador do RG nº [RG], residente e domiciliado na [ENDEREÇO COMPLETO], doravante denominado CLIENTE.
 
-CONTRATADO: [NOME DO ADVOGADO], advogado inscrito na OAB/[ESTADO] sob o nº [NÚMERO OAB], com escritório profissional na [ENDEREÇO DO ESCRITÓRIO], doravante denominado ADVOGADO.
+CONTRATADO: ${advogadoNome}, advogado inscrito na OAB/${estado} sob o nº ${oabNumero}, com escritório profissional na ${endereco}, doravante denominado ADVOGADO.
 
 As partes acima identificadas têm, entre si, justo e acertado o presente Contrato de Honorários Advocatícios, que se regerá pelas cláusulas seguintes e pelas condições descritas no presente.
 
@@ -158,7 +220,7 @@ CPF:`;
 
 OUTORGANTE: [NOME COMPLETO], [NACIONALIDADE], [ESTADO CIVIL], [PROFISSÃO], portador(a) da cédula de identidade RG nº [NÚMERO DO RG], inscrito(a) no CPF/MF sob o nº [NÚMERO DO CPF], residente e domiciliado(a) na [ENDEREÇO COMPLETO], [CIDADE], [ESTADO], [CEP].
 
-OUTORGADO(S): [NOME DO ADVOGADO], brasileiro(a), advogado(a), inscrito(a) na OAB/[ESTADO] sob o nº [NÚMERO DA OAB], com escritório profissional na [ENDEREÇO COMPLETO DO ESCRITÓRIO], [CIDADE], [ESTADO], [CEP].
+OUTORGADO(S): ${advogadoNome}, brasileiro(a), advogado(a), inscrito(a) na OAB/${estado} sob o nº ${oabNumero}, com escritório profissional na ${endereco}, São Paulo, SP, [CEP].
 
 PODERES: Por este instrumento particular de procuração, o(a) outorgante nomeia e constitui seu(sua) bastante procurador(a) o(a) outorgado(a) acima qualificado(a), a quem confere amplos poderes para o foro em geral, com a cláusula "ad judicia et extra", em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes e defendê-lo(a) nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente, podendo ainda substabelecer esta com ou sem reservas de poderes, dando tudo por bom, firme e valioso, especialmente para [FINALIDADE ESPECÍFICA DA PROCURAÇÃO, SE HOUVER].
 
