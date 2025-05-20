@@ -21,9 +21,67 @@ import {
   Bell,
   Filter,
   FileText as FileIcon,
-  BarChart
+  BarChart,
+  Eye,
+  FileSearch
 } from "lucide-react";
-import { AnalyzedDocument } from "@/lib/types";
+
+// Componente para o card de documento
+interface DocumentCardProps {
+  id: string;
+  type: string;
+  title: string;
+  clientName?: string;
+  date: string;
+  description: string;
+}
+
+const DocumentCard = ({ id, type, title, clientName, date, description }: DocumentCardProps) => {
+  return (
+    <div className="bg-white overflow-hidden rounded-lg border border-gray-200 shadow-sm transition-all hover:shadow-md">
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-[#9F85FF]">
+            {type}
+          </span>
+          <span className="text-xs text-gray-500">{date}</span>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-1">{title}</h3>
+        {clientName && (
+          <div className="flex items-center text-sm text-gray-600 mb-3">
+            <Users className="h-4 w-4 mr-1 text-gray-400" />
+            <span>{clientName}</span>
+          </div>
+        )}
+        <p className="text-sm text-gray-500 line-clamp-3 mb-4">{description}</p>
+        <div className="flex justify-between pt-2 border-t border-gray-100">
+          <button 
+            className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
+            onClick={() => {
+              // Ação para visualizar o documento
+              console.log("Visualizar documento", id);
+              window.location.href = `/documento/${id}`;
+            }}
+          >
+            <Eye className="h-3 w-3 mr-1" />
+            Visualizar
+          </button>
+          <button 
+            className="text-sm text-[#9F85FF] hover:text-[#8A6EF3] flex items-center"
+            onClick={() => {
+              // Ação para ver análise completa
+              console.log("Ver análise", id);
+              window.location.href = `/analise/${id}`;
+            }}
+          >
+            <FileSearch className="h-3 w-3 mr-1" />
+            Ver análise
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Documents() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -44,6 +102,21 @@ export default function Documents() {
     { id: "parecer", name: "Pareceres" }
   ];
   
+  // Interface para os documentos
+  interface DocumentItem {
+    id: string;
+    title: string;
+    fileType: string;
+    documentType: string;
+    clientName: string;
+    status: string;
+    analysis: string;
+    createdAt: string;
+    createdAgo: string;
+    content?: string;
+    fileInfo?: string;
+  }
+
   // Obter a lista de documentos com filtros
   const { data, isLoading: documentsLoading, refetch } = useQuery({
     queryKey: ["/api/documents", { search: searchQuery, documentType, clientName: clientFilter }],
@@ -51,10 +124,10 @@ export default function Documents() {
   });
   
   // Extrair os documentos dos dados retornados pela API
-  const documentsData = data?.documents || [];
+  const documents = data?.documents || [];
   
-  // Aplicar filtros locais adicionais (além dos que já foram aplicados no servidor)
-  const documents = documentsData;
+  // Debug - remover depois
+  console.log("Documentos recebidos:", documents);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -393,6 +466,8 @@ export default function Documents() {
             </div>
           </div>
 
+          {/* Componente DocumentCard - Implementado corretamente */}
+
           {/* Document Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {documentsLoading ? (
@@ -416,16 +491,25 @@ export default function Documents() {
                   Novo documento
                 </Button>
               </div>
-            ) : documents.map(doc => (
-              <DocumentCard
-                key={doc.id}
-                type={doc.documentType || "Documento"}
-                title={doc.title}
-                clientName={doc.clientName}
-                date={doc.createdAgo}
-                description={doc.analysis || "Sem análise disponível"}
-              />
-            ))}
+            ) : documents.map(doc => {
+              // Determinar o tipo do documento com base no título
+              let documentType = "Documento";
+              if (doc.title.toLowerCase().includes("contrato")) documentType = "Contrato";
+              else if (doc.title.toLowerCase().includes("petição") || doc.title.toLowerCase().includes("peticao")) documentType = "Petição";
+              else if (doc.title.toLowerCase().includes("procuração") || doc.title.toLowerCase().includes("procuracao")) documentType = "Procuração";
+              
+              return (
+                <DocumentCard
+                  key={doc.id}
+                  id={doc.id}
+                  type={documentType}
+                  title={doc.title}
+                  clientName={doc.clientName || "Cliente não especificado"}
+                  date={doc.createdAgo}
+                  description={doc.analysis || "Sem análise disponível"}
+                />
+              );
+            })}
           </div>
         </main>
       </div>
