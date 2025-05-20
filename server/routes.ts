@@ -374,6 +374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: req.body.content, 
         fileType: "text/plain",
         fileInfo: null,
+        clientName: req.body.clientName || "Cliente não especificado",
         status: req.body.status || 'draft',
         analysis: JSON.stringify({ summary: "Documento criado a partir de modelo" }),
         createdAt: new Date()
@@ -395,11 +396,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
+      // Obter parâmetros de filtro se existirem
+      const searchQuery = req.query.search?.toLowerCase();
+      const documentType = req.query.documentType;
+      const clientName = req.query.clientName;
+      
       // Get user's documents
-      const userDocuments = await storage.getUserDocuments(userId, 10);
+      const userDocuments = await storage.getUserDocuments(userId, 50);
+      
+      // Aplicar filtros (se houver)
+      let filteredDocuments = userDocuments;
+      
+      if (searchQuery) {
+        filteredDocuments = filteredDocuments.filter(doc => 
+          doc.title.toLowerCase().includes(searchQuery) || 
+          (doc.content && doc.content.toLowerCase().includes(searchQuery))
+        );
+      }
+      
+      if (documentType && documentType !== 'all') {
+        filteredDocuments = filteredDocuments.filter(doc => 
+          doc.fileType.toLowerCase() === documentType.toLowerCase()
+        );
+      }
+      
+      if (clientName && clientName !== 'all') {
+        filteredDocuments = filteredDocuments.filter(doc => 
+          doc.clientName && doc.clientName.toLowerCase().includes(clientName.toLowerCase())
+        );
+      }
       
       // Format the documents
-      const formattedDocuments = userDocuments.map(doc => {
+      const formattedDocuments = filteredDocuments.map(doc => {
         // Parse the analysis from JSON
         let analysisObj;
         try {
@@ -408,12 +436,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           analysisObj = { summary: "Não foi possível carregar a análise" };
         }
         
+        // Extract document type in Portuguese
+        let documentTypeInPortuguese = "Documento";
+        if (doc.title.toLowerCase().includes("contrato")) documentTypeInPortuguese = "Contrato";
+        else if (doc.title.toLowerCase().includes("petição") || doc.title.toLowerCase().includes("peticao")) documentTypeInPortuguese = "Petição";
+        else if (doc.title.toLowerCase().includes("procuração") || doc.title.toLowerCase().includes("procuracao")) documentTypeInPortuguese = "Procuração";
+        else if (doc.title.toLowerCase().includes("parecer")) documentTypeInPortuguese = "Parecer";
+        
         return {
           id: doc.id,
           title: doc.title,
           fileType: doc.fileType,
           fileInfo: doc.fileInfo,
           status: doc.status,
+          content: doc.content,
+          clientName: doc.clientName || "Cliente não especificado",
+          documentType: documentTypeInPortuguese,
           analysis: analysisObj.summary,
           createdAt: doc.createdAt.toISOString(),
           createdAgo: formatRelativeTime(doc.createdAt)

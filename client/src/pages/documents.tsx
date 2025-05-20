@@ -31,18 +31,30 @@ export default function Documents() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("documents");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [documentType, setDocumentType] = useState<string | null>(null);
-  const [clientName, setClientName] = useState<string | null>(null);
+  const [documentType, setDocumentType] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const [clientFilter, setClientFilter] = useState<string>("all");
   
-  // Obter a lista de documentos
-  const { data, isLoading: documentsLoading } = useQuery({
-    queryKey: ["/api/documents"],
+  // Lista de tipos de documentos para o filtro
+  const documentTypes = [
+    { id: "all", name: "Todos os tipos" },
+    { id: "contrato", name: "Contratos" },
+    { id: "peticao", name: "Petições" },
+    { id: "procuracao", name: "Procurações" },
+    { id: "parecer", name: "Pareceres" }
+  ];
+  
+  // Obter a lista de documentos com filtros
+  const { data, isLoading: documentsLoading, refetch } = useQuery({
+    queryKey: ["/api/documents", { search: searchQuery, documentType, clientName: clientFilter }],
     enabled: isAuthenticated,
   });
   
   // Extrair os documentos dos dados retornados pela API
-  const documents = data?.documents || [];
+  const documentsData = data?.documents || [];
+  
+  // Aplicar filtros locais adicionais (além dos que já foram aplicados no servidor)
+  const documents = documentsData;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -319,8 +331,8 @@ export default function Documents() {
           </div>
 
           {/* Search and Filter */}
-          <div className="mb-6 flex justify-between">
-            <div className="relative w-full max-w-md">
+          <div className="mb-6 flex flex-col md:flex-row justify-between gap-4">
+            <div className="relative w-full md:max-w-md">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400" />
               </div>
@@ -329,28 +341,89 @@ export default function Documents() {
                 className="pl-10 pr-4 py-2 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    refetch();
+                  }
+                }}
               />
             </div>
-            <div className="flex items-center">
-              <button className="flex items-center text-gray-600 hover:text-gray-800">
-                <Filter className="h-4 w-4 mr-2" />
-                <span>Todos os tipos</span>
-                <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <button 
+                  className="flex items-center text-gray-600 hover:text-gray-800 border px-3 py-2 rounded-md"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  <span>{documentTypes.find(dt => dt.id === documentType)?.name || "Todos os tipos"}</span>
+                  <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showFilters && (
+                  <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border">
+                    <div className="py-1">
+                      {documentTypes.map(type => (
+                        <button
+                          key={type.id}
+                          className={`block w-full text-left px-4 py-2 text-sm ${
+                            documentType === type.id ? 'bg-purple-100 text-[#9F85FF]' : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                          onClick={() => {
+                            setDocumentType(type.id);
+                            setShowFilters(false);
+                            refetch();
+                          }}
+                        >
+                          {type.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <button 
+                onClick={() => refetch()}
+                className="text-[#9F85FF] hover:text-[#8A6EF3] border border-[#9F85FF] px-3 py-2 rounded-md"
+              >
+                Aplicar Filtros
               </button>
             </div>
           </div>
 
           {/* Document Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sampleDocuments.map(doc => (
+            {documentsLoading ? (
+              <div className="col-span-3 flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9F85FF]"></div>
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="col-span-3 bg-white p-8 rounded-lg border text-center">
+                <FileIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-1">Nenhum documento encontrado</h3>
+                <p className="text-gray-500 mb-4">
+                  {searchQuery || documentType !== 'all' 
+                    ? "Nenhum documento corresponde aos critérios de busca atuais. Tente ajustar seus filtros."
+                    : "Você ainda não tem documentos. Crie seu primeiro documento para começar."}
+                </p>
+                <Button 
+                  className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white"
+                  onClick={() => window.location.href = "/novo-documento"}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Novo documento
+                </Button>
+              </div>
+            ) : documents.map(doc => (
               <DocumentCard
                 key={doc.id}
-                type={doc.type}
+                type={doc.documentType || "Documento"}
                 title={doc.title}
-                date={doc.date}
-                description={doc.description}
+                clientName={doc.clientName}
+                date={doc.createdAgo}
+                description={doc.analysis || "Sem análise disponível"}
               />
             ))}
           </div>
