@@ -64,179 +64,172 @@ export default function SimplifiedFloatingButton() {
     estado: string;
   }
 
-  // Função para extrair CPF da mensagem
-  const extrairCPF = (mensagem: string): string => {
-    const cpfRegex = /\d{3}\.?\d{3}\.?\d{3}-?\d{2}/g;
-    const match = mensagem.match(cpfRegex);
-    return match ? match[0] : "218.320.908-92"; // CPF padrão se não encontrar
-  };
-
-  // Função para obter tipo de documento da mensagem
-  const obterTipoDocumento = (mensagem: string): string => {
-    const tiposDocumentos = [
-      { tipo: "PROCURAÇÃO", palavrasChave: ["procuração", "procuracao"] },
-      { tipo: "CONTRATO DE LOCAÇÃO", palavrasChave: ["contrato de locação", "contrato de locacao", "locação", "locacao"] },
-      { tipo: "CONTRATO DE PRESTAÇÃO DE SERVIÇOS", palavrasChave: ["prestação de serviços", "prestacao de servicos"] },
-      { tipo: "PETIÇÃO INICIAL", palavrasChave: ["petição inicial", "peticao inicial"] },
-      { tipo: "RECURSO", palavrasChave: ["recurso"] },
-    ];
-
-    const mensagemLowerCase = mensagem.toLowerCase();
+  // Função para gerar PDF de procuração
+  const gerarProcuracaoPDF = () => {
+    const cliente = {
+      nome: "MARIA SILVA SANTOS",
+      cpf: "218.320.908-92",
+      endereco: "Rua Doutor Paulo De Queiroz, 790",
+      cidade: "São Paulo",
+      estado: "SP"
+    };
     
-    for (const doc of tiposDocumentos) {
-      if (doc.palavrasChave.some(palavra => mensagemLowerCase.includes(palavra))) {
-        return doc.tipo;
+    // Criar um novo documento PDF
+    const doc = new jsPDF();
+    
+    // Adicionar marca d'água de fundo
+    doc.setFontSize(60);
+    doc.setTextColor(230, 230, 230);
+    doc.text("LAWAI", 105, 150, { align: "center" });
+    
+    // Configurar fonte para o título
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    
+    // Título centralizado
+    doc.text("PROCURAÇÃO", 105, 20, { align: "center" });
+    
+    // Configurar fonte para o texto
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    // Configuração de página e parágrafos
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const addParagraph = (text: string, startX: number, startY: number, maxWidth: number): number => {
+      const splitText = doc.splitTextToSize(text, maxWidth);
+      doc.text(splitText, startX, startY);
+      return startY + (splitText.length * 8);
+    };
+    
+    // Posição inicial
+    let posY = 40;
+    
+    // Conteúdo da procuração
+    posY = addParagraph(`OUTORGANTE: ${cliente.nome}, brasileiro(a), portador(a) do CPF nº ${cliente.cpf}, residente e domiciliado(a) à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`, 20, posY, pageWidth - 40);
+    posY += 15;
+    
+    posY = addParagraph("OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado(a), inscrito(a) na OAB/XX sob nº XXXXX, com escritório profissional localizado à [ENDEREÇO COMPLETO].", 20, posY, pageWidth - 40);
+    posY += 15;
+    
+    posY = addParagraph("PODERES: Por este instrumento particular de procuração, o(a) outorgante nomeia e constitui o(a) outorgado(a) como seu(sua) procurador(a), conferindo-lhe poderes para o foro em geral, com a cláusula \"ad judicia et extra\", em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes e defendê-lo(a) nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente.", 20, posY, pageWidth - 40);
+    posY += 25;
+    
+    // Data
+    doc.text(`${cliente.cidade}, ${new Date().toLocaleDateString('pt-BR')}.`, 20, posY);
+    posY += 40;
+    
+    // Assinatura
+    doc.text("____________________________________", 20, posY);
+    posY += 10;
+    doc.text(`${cliente.nome}`, 20, posY);
+    posY += 8;
+    doc.text(`CPF: ${cliente.cpf}`, 20, posY);
+    
+    // Salvar PDF
+    doc.save(`Procuracao_${cliente.nome.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+    
+    // Adicionar mensagem no chat
+    setChatHistory(prev => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "📄 O download da procuração foi iniciado. O documento será salvo em formato PDF."
       }
-    }
+    ]);
+  };
+  
+  // Função para gerar PDF de contrato de locação
+  const gerarContratoLocacaoPDF = () => {
+    const cliente = {
+      nome: "MARIA SILVA SANTOS",
+      cpf: "218.320.908-92",
+      endereco: "Rua Doutor Paulo De Queiroz, 790",
+      cidade: "São Paulo",
+      estado: "SP"
+    };
     
-    return "DOCUMENTO JURÍDICO"; // Tipo genérico se não identificar
+    // Criar um novo documento PDF
+    const doc = new jsPDF();
+    
+    // Adicionar marca d'água de fundo
+    doc.setFontSize(60);
+    doc.setTextColor(230, 230, 230);
+    doc.text("LAWAI", 105, 150, { align: "center" });
+    
+    // Configurar fonte para o título
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    
+    // Título centralizado
+    doc.text("CONTRATO DE LOCAÇÃO DE IMÓVEL", 105, 20, { align: "center" });
+    
+    // Configurar fonte para o texto
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    // Configuração de página e parágrafos
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const addParagraph = (text: string, startX: number, startY: number, maxWidth: number): number => {
+      const splitText = doc.splitTextToSize(text, maxWidth);
+      doc.text(splitText, startX, startY);
+      return startY + (splitText.length * 8);
+    };
+    
+    // Posição inicial
+    let posY = 40;
+    
+    // Conteúdo do contrato
+    posY = addParagraph("LOCADOR: [NOME COMPLETO DO LOCADOR], [qualificação completa].", 20, posY, pageWidth - 40);
+    posY += 15;
+    
+    posY = addParagraph(`LOCATÁRIO: ${cliente.nome}, brasileiro(a), portador(a) do CPF nº ${cliente.cpf}, residente e domiciliado(a) à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`, 20, posY, pageWidth - 40);
+    posY += 15;
+    
+    posY = addParagraph("OBJETO: O LOCADOR, sendo proprietário do imóvel situado à [ENDEREÇO COMPLETO DO IMÓVEL], loca-o ao LOCATÁRIO, mediante as cláusulas e condições seguintes:", 20, posY, pageWidth - 40);
+    posY += 15;
+    
+    posY = addParagraph("CLÁUSULA PRIMEIRA - PRAZO: A presente locação é feita pelo prazo de [PRAZO] meses, iniciando-se em [DATA DE INÍCIO] e terminando em [DATA DE TÉRMINO], data em que o LOCATÁRIO se obriga a restituir o imóvel locado completamente desocupado, no estado em que o recebeu, independentemente de notificação ou interpelação judicial.", 20, posY, pageWidth - 40);
+    posY += 15;
+    
+    posY = addParagraph("CLÁUSULA SEGUNDA - ALUGUEL: O aluguel mensal é de R$ [VALOR] que o LOCATÁRIO se compromete a pagar pontualmente até o dia [DIA] de cada mês.", 20, posY, pageWidth - 40);
+    posY += 25;
+    
+    // Data
+    doc.text(`${cliente.cidade}, ${new Date().toLocaleDateString('pt-BR')}.`, 20, posY);
+    posY += 40;
+    
+    // Assinatura
+    doc.text("____________________________________", 20, posY);
+    posY += 10;
+    doc.text(`${cliente.nome}`, 20, posY);
+    posY += 8;
+    doc.text(`CPF: ${cliente.cpf}`, 20, posY);
+    
+    // Salvar PDF
+    doc.save(`Contrato_Locacao_${cliente.nome.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+    
+    // Adicionar mensagem no chat
+    setChatHistory(prev => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "📄 O download do contrato de locação foi iniciado. O documento será salvo em formato PDF."
+      }
+    ]);
   };
-
-  // Função para criar conteúdo do documento com base no tipo
-  const gerarConteudoDocumento = (tipoDocumento: string, cliente: Cliente): any => {
-    switch (tipoDocumento) {
-      case "PROCURAÇÃO":
-        return {
-          titulo: "PROCURAÇÃO",
-          conteudo: [
-            `OUTORGANTE: ${cliente.nome}, brasileiro(a), portador(a) do CPF nº ${cliente.cpf}, residente e domiciliado(a) à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`,
-            "",
-            "OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado(a), inscrito(a) na OAB/XX sob nº XXXXX, com escritório profissional localizado à [ENDEREÇO COMPLETO].",
-            "",
-            "PODERES: Por este instrumento particular de procuração, o(a) outorgante nomeia e constitui o(a) outorgado(a) como seu(sua) procurador(a), conferindo-lhe poderes para o foro em geral, com a cláusula \"ad judicia et extra\", em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes e defendê-lo(a) nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente."
-          ]
-        };
-      
-      case "CONTRATO DE LOCAÇÃO":
-        return {
-          titulo: "CONTRATO DE LOCAÇÃO DE IMÓVEL",
-          conteudo: [
-            "LOCADOR: [NOME COMPLETO DO LOCADOR], [qualificação completa].",
-            "",
-            `LOCATÁRIO: ${cliente.nome}, brasileiro(a), portador(a) do CPF nº ${cliente.cpf}, residente e domiciliado(a) à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`,
-            "",
-            "OBJETO: O LOCADOR, sendo proprietário do imóvel situado à [ENDEREÇO COMPLETO DO IMÓVEL], loca-o ao LOCATÁRIO, mediante as cláusulas e condições seguintes:",
-            "",
-            "CLÁUSULA PRIMEIRA - PRAZO: A presente locação é feita pelo prazo de [PRAZO] meses, iniciando-se em [DATA DE INÍCIO] e terminando em [DATA DE TÉRMINO], data em que o LOCATÁRIO se obriga a restituir o imóvel locado completamente desocupado, no estado em que o recebeu, independentemente de notificação ou interpelação judicial.",
-            "",
-            "CLÁUSULA SEGUNDA - ALUGUEL: O aluguel mensal é de R$ [VALOR] que o LOCATÁRIO se compromete a pagar pontualmente até o dia [DIA] de cada mês."
-          ]
-        };
-      
-      default:
-        return {
-          titulo: tipoDocumento,
-          conteudo: [
-            `Este é um modelo básico de ${tipoDocumento.toLowerCase()}.`,
-            "",
-            `PARTE INTERESSADA: ${cliente.nome}, brasileiro(a), portador(a) do CPF nº ${cliente.cpf}, residente e domiciliado(a) à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`,
-            "",
-            "Este documento foi gerado automaticamente pelo sistema LAWAI e deve ser revisado por um profissional qualificado antes de sua utilização para fins legais.",
-            "",
-            "[O conteúdo completo deste documento deve ser elaborado por um advogado, de acordo com as especificidades do caso e a legislação vigente.]"
-          ]
-        };
-    }
-  };
-
-  // Função para lidar com o download do PDF
+  
+  // Função genérica para lidar com o download do PDF
   const handleDownloadPDF = () => {
-    // Identificar qual foi a última mensagem do usuário para determinar o tipo de documento
-    let ultimaMensagem = "";
-    for (let i = chatHistory.length - 1; i >= 0; i--) {
-      if (chatHistory[i].role === "user") {
-        ultimaMensagem = chatHistory[i].content;
-        break;
-      }
-    }
-    
-    // Extrair o CPF do contexto da mensagem (se disponível)
-    const cpfExtraido = extrairCPF(ultimaMensagem);
-    
-    // Identificar o tipo de documento a ser gerado
-    const tipoDocumento = obterTipoDocumento(ultimaMensagem);
-    
-    // Simular a preparação e download do arquivo
     setIsTyping(true);
     
     setTimeout(() => {
       setIsTyping(false);
-      setChatHistory(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: `📄 O download do ${tipoDocumento.toLowerCase()} foi iniciado. O documento será salvo em formato PDF.`
-        }
-      ]);
       
-      // Dados do cliente para o documento
-      const cliente: Cliente = {
-        nome: "MARIA SILVA SANTOS",
-        cpf: cpfExtraido,
-        endereco: "Rua Doutor Paulo De Queiroz, 790",
-        cidade: "São Paulo",
-        estado: "SP"
-      };
-      
-      // Obter estrutura e conteúdo do documento
-      const documento = gerarConteudoDocumento(tipoDocumento, cliente);
-      
-      // Criar um novo documento PDF
-      const doc = new jsPDF();
-      
-      // Adicionar marca d'água de fundo (texto claro)
-      doc.setFontSize(60);
-      doc.setTextColor(230, 230, 230);
-      doc.text("LAWAI", 105, 150, { align: "center" });
-      
-      // Configurar fonte e tamanho para o título
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(0, 0, 0);
-      
-      // Título centralizado
-      doc.text(documento.titulo, 105, 20, { align: "center" });
-      
-      // Configurar fonte para o corpo do texto
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      
-      // Configuração de página para A4
-      const pageWidth = doc.internal.pageSize.getWidth();
-      
-      // Função para escrever parágrafos com quebra automática
-      const addParagraph = (text: string, startX: number, startY: number, maxWidth: number): number => {
-        const splitText = doc.splitTextToSize(text, maxWidth);
-        doc.text(splitText, startX, startY);
-        return startY + (splitText.length * 8);
-      };
-      
-      // Posição inicial
-      let posY = 40;
-      
-      // Adicionar o conteúdo do documento
-      for (const paragrafos of documento.conteudo) {
-        posY = addParagraph(paragrafos, 20, posY, pageWidth - 40);
-        posY += 10; // Espaçamento entre parágrafos
-      }
-      
-      posY += 15;
-      
-      // Adicionar data
-      doc.text(`${cliente.cidade}, ${new Date().toLocaleDateString('pt-BR')}.`, 20, posY);
-      
-      posY += 40;
-      
-      // Adicionar assinatura
-      doc.text("____________________________________", 20, posY);
-      posY += 10;
-      doc.text(`${cliente.nome}`, 20, posY);
-      posY += 8;
-      doc.text(`CPF: ${cliente.cpf}`, 20, posY);
-      
-      // Salvar o PDF com nome apropriado
-      doc.save(`${documento.titulo.replace(/\s+/g, '_')}_${cliente.nome.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
-    }, 1500);
+      // Por padrão geramos uma procuração
+      gerarProcuracaoPDF();
+    }, 1000);
   };
 
   const handleSendMessage = () => {
@@ -354,27 +347,23 @@ export default function SimplifiedFloatingButton() {
                       onClick={() => {
                         // Se inclui locação, baixar um contrato de locação
                         if (msg.content.toLowerCase().includes("locação") || msg.content.toLowerCase().includes("locacao")) {
-                          handleDownloadPDF();
+                          gerarContratoLocacaoPDF();
                         } 
                         // Se inclui baixar, baixar o documento
                         else if (msg.content.includes("Baixar")) {
-                          handleDownloadPDF();
+                          gerarProcuracaoPDF();
                         }
                         // Para procuração
                         else if (msg.content.toLowerCase().includes("procuração") || msg.content.toLowerCase().includes("procuracao")) {
-                          handleProcuracaoAction();
+                          gerarProcuracaoPDF();
                         }
                         // Para qualquer outro tipo de documento
                         else {
-                          handleDownloadPDF();
+                          gerarProcuracaoPDF();
                         }
                       }}
                     >
-                      {msg.content.includes("Baixar") ? (
-                        <FileText className="h-4 w-4 mr-2" />
-                      ) : (
-                        <User className="h-4 w-4 mr-2" />
-                      )}
+                      <FileText className="h-4 w-4 mr-2" />
                       {msg.content}
                     </Button>
                   </div>
