@@ -94,14 +94,14 @@ MARIA SILVA SANTOS
 CPF: 218.320.908-92
       `;
       
-      // Criar um objeto Blob com o conteúdo do documento
-      const blob = new Blob([conteudoProcuracao], { type: 'application/pdf' });
+      // Criar um objeto Blob com o conteúdo do documento como texto
+      const blob = new Blob([conteudoProcuracao], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       
       // Criar um link de download e clicar automaticamente
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Procuracao_Maria_Silva_Santos_${new Date().toISOString().slice(0,10)}.pdf`;
+      a.download = `Procuracao_Maria_Silva_Santos_${new Date().toISOString().slice(0,10)}.txt`;
       document.body.appendChild(a);
       a.click();
       
