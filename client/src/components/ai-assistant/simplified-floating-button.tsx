@@ -232,6 +232,65 @@ export default function SimplifiedFloatingButton() {
     }, 1000);
   };
 
+  // Verificações locais para respostas rápidas
+  const checkLocalResponses = (query: string): string | null => {
+    const lowerQuery = query.toLowerCase().trim();
+    
+    // LGPD - Lei Geral de Proteção de Dados
+    if (lowerQuery.includes('lgpd') || lowerQuery.includes('lei geral de proteção de dados')) {
+      return `A Lei Geral de Proteção de Dados (LGPD) - Lei nº 13.709/2018 - é a legislação brasileira que regula o tratamento de dados pessoais. Seus principais pontos são:
+
+1. Abrangência: Aplica-se a qualquer operação com dados pessoais por pessoa física ou jurídica.
+2. Princípios: Finalidade, adequação, necessidade, livre acesso, qualidade, transparência, segurança, prevenção.
+3. Bases legais: Consentimento, obrigação legal, legítimo interesse, entre outras.
+4. Direitos dos titulares: Acesso, correção, portabilidade, exclusão, revogação de consentimento.
+5. Sanções: Advertência, multa (até 2% do faturamento, limitada a R$ 50 milhões por infração).
+6. ANPD: Autoridade Nacional de Proteção de Dados é o órgão fiscalizador.`;
+    }
+    
+    // CDC - Código de Defesa do Consumidor
+    if (lowerQuery.includes('cdc') || lowerQuery.includes('código de defesa do consumidor')) {
+      return `O Código de Defesa do Consumidor (CDC) - Lei nº 8.078/1990 - estabelece normas de proteção do consumidor. Principais aspectos:
+
+1. Princípios: Vulnerabilidade do consumidor, boa-fé objetiva, equilíbrio contratual.
+2. Direitos básicos: Proteção à vida e saúde, informação adequada, proteção contra publicidade enganosa.
+3. Responsabilidade: Objetiva do fornecedor, independente de culpa.
+4. Práticas abusivas: Proibição de condicionamento de venda, elevação injustificada de preços.
+5. Proteção contratual: Nulidade de cláusulas abusivas, direito de arrependimento.
+6. Inversão do ônus da prova: Quando verossímil a alegação do consumidor.`;
+    }
+    
+    // Contratos
+    if (lowerQuery.includes('contrato') && (lowerQuery.includes('locação') || lowerQuery.includes('aluguel'))) {
+      return `Um contrato de locação é um documento que formaliza o acordo entre locador (proprietário) e locatário (inquilino), seguindo a Lei do Inquilinato (Lei nº 8.245/91). Elementos essenciais:
+
+1. Identificação das partes (locador e locatário)
+2. Descrição do imóvel
+3. Prazo de locação
+4. Valor do aluguel e forma de reajuste
+5. Responsabilidades sobre despesas (IPTU, condomínio)
+6. Garantias (fiança, caução, seguro)
+7. Multas por descumprimento
+
+Posso ajudar a gerar um contrato de locação para você.`;
+    }
+    
+    // Procuração
+    if (lowerQuery.includes('procuração') || lowerQuery.includes('procuracao')) {
+      return `Uma procuração é um instrumento pelo qual uma pessoa (outorgante) confere poderes a outra (outorgado) para agir em seu nome. No direito brasileiro, existem diversos tipos:
+
+1. Procuração ad judicia: para representação em processos judiciais
+2. Procuração pública: lavrada em cartório
+3. Procuração particular: documento privado entre as partes
+4. Procuração com poderes específicos: para atos determinados
+5. Procuração com poderes gerais: para gestão ampla
+
+Posso ajudar a gerar uma procuração adaptada às suas necessidades.`;
+    }
+    
+    return null;
+  };
+
   const handleSendMessage = async () => {
     if (!message.trim()) return;
 
@@ -240,9 +299,49 @@ export default function SimplifiedFloatingButton() {
     setMessage("");
     setIsTyping(true);
 
+    // Verificar se temos uma resposta local disponível
+    const localResponse = checkLocalResponses(message);
+    
+    if (localResponse) {
+      // Usar resposta local para maior velocidade
+      setTimeout(() => {
+        setChatHistory(prev => [...prev, { role: "assistant", content: localResponse }]);
+        setIsTyping(false);
+        
+        // Se for resposta sobre documento, adicionar botão de ação
+        const lowerMessage = message.toLowerCase();
+        if (lowerMessage.includes('procuração') || lowerMessage.includes('procuracao')) {
+          setTimeout(() => {
+            setChatHistory(prev => [...prev, { 
+              role: "action", 
+              content: "Monte uma procuração com os dados do cliente de cpf 218320908-92 que está gravado em minha base de dados"
+            }]);
+          }, 500);
+        } else if (lowerMessage.includes('contrato') && (lowerMessage.includes('locação') || lowerMessage.includes('locacao'))) {
+          setTimeout(() => {
+            setChatHistory(prev => [...prev, { 
+              role: "action", 
+              content: "Monte um contrato de locação para o cliente de CPF 218320908-92"
+            }]);
+          }, 500);
+        }
+      }, 1500);
+      return;
+    }
+
     try {
-      // Logging para debug
-      console.log("Enviando consulta para a API:", message);
+      // Se não tivermos resposta local, consultar a API
+      
+      // Adicionar mensagem de carregamento para feedback ao usuário
+      setTimeout(() => {
+        if (isTyping) {
+          const pendingMessage = {
+            role: "assistant" as MessageRole, 
+            content: "Processando sua consulta..."
+          };
+          setChatHistory(prev => [...prev, pendingMessage]);
+        }
+      }, 1000);
       
       // Enviar requisição para a API de IA
       const response = await fetch('/api/ai/query', {
@@ -255,17 +354,13 @@ export default function SimplifiedFloatingButton() {
           context: "assistente jurídico" 
         }),
       });
-
-      console.log("Status da resposta:", response.status);
       
       // Verificar se a resposta é válida
       if (!response.ok) {
-        console.error("Erro na requisição:", response.status, response.statusText);
         throw new Error(`Erro na requisição: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Dados recebidos:", data);
       
       // Verificar se temos uma resposta da API
       if (data.result || data.response) {
