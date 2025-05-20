@@ -468,4 +468,36 @@ export class DatabaseStorage implements IStorage {
 
 
 
+  // User Settings operations
+  async getUserSettings(userId: string): Promise<UserSettings | undefined> {
+    const [settings] = await db.select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId));
+    
+    return settings;
+  }
+
+  async createUserSettings(settings: InsertUserSettings): Promise<UserSettings> {
+    const [createdSettings] = await db
+      .insert(userSettings)
+      .values(settings)
+      .returning();
+    
+    return createdSettings;
+  }
+
+  async updateUserSettings(id: string, updates: Partial<UserSettings>): Promise<UserSettings> {
+    const [updatedSettings] = await db
+      .update(userSettings)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(userSettings.id, id))
+      .returning();
+    
+    return updatedSettings;
+  }
+}
+
 export const storage = new DatabaseStorage();
