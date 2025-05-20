@@ -17,6 +17,7 @@ import AITestPage from "@/pages/ai-test";
 import ClientsPage from "@/pages/clients";
 import DeadlinesPage from "@/pages/deadlines";
 import SimplifiedFloatingButton from "@/components/ai-assistant/simplified-floating-button";
+import FloatingWritingButton from "@/components/legal-writing-assistant/floating-writing-button";
 
 // Contexto de autenticação simples para desenvolvimento
 import { createContext } from "react";
@@ -82,6 +83,7 @@ function App() {
           <Toaster />
           <Router />
           <SimplifiedFloatingButton />
+          <FloatingWritingButton />
         </TooltipProvider>
       </AuthContext.Provider>
     </QueryClientProvider>
