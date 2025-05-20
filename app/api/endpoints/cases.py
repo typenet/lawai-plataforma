@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from app.db.session import get_db
 from app.models.user import User
@@ -9,6 +9,7 @@ from app.models.client import Client
 from app.schemas.case import CaseCreate, CaseUpdate, Case as CaseSchema, CaseList
 from app.utils.security import get_current_user
 from app.utils.logger import logger
+from app.api.endpoints.cases_service import CaseService
 
 router = APIRouter()
 
@@ -184,4 +185,24 @@ async def delete_case(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao excluir o caso"
+        )
+
+@router.get("/options", response_model=List[Dict[str, Any]])
+async def get_case_options(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Obtém opções de processos para uso em seletores e dropdowns
+    """
+    try:
+        options = CaseService.get_case_options(db, current_user.id)
+        return options
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Erro ao buscar opções de processos: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao carregar os processos"
         )

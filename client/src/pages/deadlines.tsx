@@ -58,11 +58,11 @@ export default function DeadlinesPage() {
   
   // Consultar casos para o select de criação de prazo
   const { data: casesData, isLoading: isCasesLoading } = useQuery({
-    queryKey: ["/api/cases"],
+    queryKey: ["/api/cases/options"],
     enabled: isAuthenticated,
   });
   
-  const cases = casesData?.cases || [];
+  const caseOptions = casesData || [];
 
   // Adicionar um novo prazo
   const addDeadlineMutation = useMutation({
@@ -234,9 +234,9 @@ export default function DeadlinesPage() {
   };
   
   const getCaseName = (caseId: number) => {
-    if (!cases?.cases) return "Carregando...";
-    const foundCase = cases.cases.find((c: Case) => c.id === caseId);
-    return foundCase ? foundCase.caseNumber : "Caso não encontrado";
+    if (!caseOptions || isCasesLoading) return "Carregando...";
+    const foundCase = caseOptions.find((c: any) => c.id === caseId);
+    return foundCase ? foundCase.label : "Caso não encontrado";
   };
 
   if (!isAuthenticated) {
