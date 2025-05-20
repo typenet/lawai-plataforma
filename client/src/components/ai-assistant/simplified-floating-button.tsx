@@ -241,6 +241,9 @@ export default function SimplifiedFloatingButton() {
     setIsTyping(true);
 
     try {
+      // Logging para debug
+      console.log("Enviando consulta para a API:", message);
+      
       // Enviar requisição para a API de IA
       const response = await fetch('/api/ai/query', {
         method: 'POST',
@@ -253,11 +256,16 @@ export default function SimplifiedFloatingButton() {
         }),
       });
 
+      console.log("Status da resposta:", response.status);
+      
+      // Verificar se a resposta é válida
       if (!response.ok) {
+        console.error("Erro na requisição:", response.status, response.statusText);
         throw new Error(`Erro na requisição: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log("Dados recebidos:", data);
       
       // Verificar se temos uma resposta da API
       if (data.result || data.response) {

@@ -330,12 +330,11 @@ router.post('/query', async (req, res) => {
     let resposta = null;
     
     // Buscar correspondências exatas ou parciais
-    for (const [key, value] of queryMap.entries()) {
+    queryMap.forEach((value, key) => {
       if (lowerQuery.includes(key)) {
         resposta = value;
-        break;
       }
-    }
+    });
     
     // Se encontrou resposta no mapa, retorna imediatamente
     if (resposta) {

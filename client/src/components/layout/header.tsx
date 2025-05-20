@@ -52,14 +52,14 @@ export default function Header() {
                 Dashboard
               </span>
             </Link>
-            <Link href="/planos">
-              <span className={`${isActive("/planos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
-                Planos
+            <Link href="/documentos">
+              <span className={`${isActive("/documentos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
+                Documentos
               </span>
             </Link>
-            <Link href="/recursos">
-              <span className={`${isActive("/recursos") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
-                Recursos
+            <Link href="/clientes">
+              <span className={`${isActive("/clientes") ? "text-navy" : "text-neutral-dark"} hover:text-navy font-medium cursor-pointer`}>
+                Clientes
               </span>
             </Link>
             
