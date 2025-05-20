@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { toast } from '@/hooks/use-toast';
 import { ChevronLeft, Upload, Check, AlertCircle, Image, PenTool } from 'lucide-react';
 import { Link } from 'wouter';
@@ -27,7 +26,6 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const queryClient = useQueryClient();
   const [address, setAddress] = useState('');
   const [oabNumber, setOabNumber] = useState('');
   const [useWatermark, setUseWatermark] = useState(false);
@@ -38,24 +36,26 @@ export default function SettingsPage() {
   
   // Fetch user settings
   const { data: settings, isLoading: isLoadingSettings } = useQuery<UserSettings>({
-    queryKey: ['/api/settings'],
-    onSuccess: (data: UserSettings) => {
-      if (data) {
-        setAddress(data.address || '');
-        setOabNumber(data.oabNumber || '');
-        setUseWatermark(data.useWatermark || false);
-        
-        // Set image previews from URLs
-        if (data.logoUrl) {
-          setLogoPreview(data.logoUrl);
-        }
-        
-        if (data.signatureUrl) {
-          setSignaturePreview(data.signatureUrl);
-        }
-      }
-    }}
+    queryKey: ['/api/settings']
   });
+
+  // Update local state when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      setAddress(settings.address || '');
+      setOabNumber(settings.oabNumber || '');
+      setUseWatermark(settings.useWatermark || false);
+      
+      // Set image previews from URLs
+      if (settings.logoUrl) {
+        setLogoPreview(settings.logoUrl);
+      }
+      
+      if (settings.signatureUrl) {
+        setSignaturePreview(settings.signatureUrl);
+      }
+    }
+  }, [settings]);
   
   // Mutation to update text settings
   const updateSettingsMutation = useMutation({
@@ -67,9 +67,8 @@ export default function SettingsPage() {
         description: 'Suas configurações foram salvas com sucesso.',
         variant: 'default',
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar as configurações.',
@@ -91,10 +90,9 @@ export default function SettingsPage() {
         description: 'Seu logo foi salvo com sucesso.',
         variant: 'default',
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
       setLogoFile(null);
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Não foi possível fazer upload do logo.',
@@ -116,10 +114,9 @@ export default function SettingsPage() {
         description: 'Sua assinatura foi salva com sucesso.',
         variant: 'default',
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
       setSignatureFile(null);
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Erro',
         description: 'Não foi possível fazer upload da assinatura.',

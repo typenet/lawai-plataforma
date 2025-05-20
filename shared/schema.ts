@@ -161,7 +161,7 @@ export type Deadline = typeof deadlines.$inferSelect;
 
 // Tabela de configurações do usuário
 export const userSettings = pgTable("user_settings", {
-  id: varchar("id").primaryKey(),
+  id: varchar("id", { length: 36 }).primaryKey().defaultRandom().notNull(),
   userId: varchar("user_id").notNull().references(() => users.id),
   logoPath: varchar("logo_path"),
   signaturePath: varchar("signature_path"),
@@ -172,6 +172,6 @@ export const userSettings = pgTable("user_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSettingsSchema = createInsertSchema(userSettings);
+export const insertUserSettingsSchema = createInsertSchema(userSettings).omit({ id: true });
 export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
 export type UserSettings = typeof userSettings.$inferSelect;

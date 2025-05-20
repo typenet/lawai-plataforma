@@ -1,258 +1,252 @@
 import { Router } from 'express';
-import { isAuthenticated } from '../simpleAuth';
 import { storage } from '../storage';
+import path from 'path';
+import fs from 'fs';
 import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import * as fs from 'fs';
-import { z } from 'zod';
+import { isAuthenticated } from '../replitAuth';
 
 const router = Router();
 
-// Configurar multer para upload de arquivos
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      let uploadDir;
-      
-      // Separar uploads de logo e assinatura em diretórios diferentes
-      if (file.fieldname === 'logo') {
-        uploadDir = path.join(process.cwd(), 'uploads', 'logos');
-      } else if (file.fieldname === 'signature') {
-        uploadDir = path.join(process.cwd(), 'uploads', 'signatures');
-      } else {
-        uploadDir = path.join(process.cwd(), 'uploads');
-      }
-      
-      // Criar diretório se não existir
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      // Garantir nomes de arquivos únicos
-      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      const ext = path.extname(file.originalname);
-      cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-    }
-  }),
-  limits: {
-    fileSize: 5 * 1024 * 1024 // Limite de 5MB
+// Configuração do multer para upload de arquivos
+const uploadDir = path.join(process.cwd(), 'uploads');
+
+// Criar diretório de uploads caso não exista
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Define storage para o multer
+const storage2 = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
   },
-  fileFilter: (req, file, cb) => {
-    // Permitir apenas imagens
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
-    if (allowedTypes.includes(file.mimetype)) {
+  filename: function (req, file, cb) {
+    // Cria um nome de arquivo único baseado no timestamp e nome original
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({ 
+  storage: storage2,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Aceita apenas imagens
+    if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Tipo de arquivo inválido. Apenas JPG, PNG e SVG são permitidos.'));
+      cb(new Error('Apenas arquivos de imagem são permitidos!') as any);
     }
   }
 });
 
-// Schema de validação para configurações de texto
-const updateSettingsSchema = z.object({
-  address: z.string().optional(),
-  oabNumber: z.string().optional(),
-  useWatermark: z.boolean().optional()
-});
-
-// Obter configurações do usuário
+// Rota para obter as configurações do usuário
 router.get('/', isAuthenticated, async (req: any, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user?.claims?.sub || 'dev-user';
+    const settings = await storage.getUserSettings(userId);
     
-    // Obter configurações atuais
-    let userSettings = await storage.getUserSettings(userId);
-    
-    if (!userSettings) {
-      // Se não existir, criar um novo registro de configurações vazio
-      userSettings = await storage.createUserSettings({
-        id: uuidv4(),
-        userId,
-        logoPath: null,
-        signaturePath: null,
-        address: '',
-        oabNumber: '',
-        useWatermark: false,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-    }
-    
-    // Converter caminhos de arquivos em URLs acessíveis
-    const baseUrl = process.env.NODE_ENV === 'production'
-      ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`
-      : 'http://localhost:5000';
-    
-    const response = {
-      ...userSettings,
-      logoUrl: userSettings.logoPath ? `${baseUrl}/${userSettings.logoPath.replace(/\\/g, '/')}` : null,
-      signatureUrl: userSettings.signaturePath ? `${baseUrl}/${userSettings.signaturePath.replace(/\\/g, '/')}` : null
-    };
-    
-    res.json(response);
-  } catch (error) {
-    console.error('Erro ao obter configurações:', error);
-    res.status(500).json({ message: 'Erro ao obter configurações do usuário' });
-  }
-});
-
-// Atualizar configurações de texto (endereço, OAB, uso de marca d'água)
-router.post('/update', isAuthenticated, async (req: any, res) => {
-  try {
-    const userId = req.user.claims.sub;
-    
-    // Validar dados de entrada
-    const validatedData = updateSettingsSchema.parse(req.body);
-    
-    // Obter configurações atuais
-    let userSettings = await storage.getUserSettings(userId);
-    
-    if (!userSettings) {
-      // Se não existir, criar um novo registro
-      userSettings = await storage.createUserSettings({
-        id: uuidv4(),
-        userId,
-        logoPath: null,
-        signaturePath: null,
-        address: validatedData.address || '',
-        oabNumber: validatedData.oabNumber || '',
-        useWatermark: validatedData.useWatermark || false,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
+    if (settings) {
+      // Adicionar URLs para as imagens
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
       
-      res.json(userSettings);
-      return;
+      const response = {
+        ...settings,
+        logoUrl: settings.logoPath ? `${baseUrl}/uploads/${path.basename(settings.logoPath)}` : null,
+        signatureUrl: settings.signaturePath ? `${baseUrl}/uploads/${path.basename(settings.signaturePath)}` : null
+      };
+      
+      return res.json(response);
     }
     
-    // Atualizar configurações existentes
-    const updatedSettings = await storage.updateUserSettings(userSettings.id, {
-      address: validatedData.address !== undefined ? validatedData.address : userSettings.address,
-      oabNumber: validatedData.oabNumber !== undefined ? validatedData.oabNumber : userSettings.oabNumber,
-      useWatermark: validatedData.useWatermark !== undefined ? validatedData.useWatermark : userSettings.useWatermark
+    // Se não existir configurações, cria uma vazia
+    const newSettings = await storage.createUserSettings({
+      userId,
+      logoPath: null,
+      signaturePath: null,
+      address: null,
+      oabNumber: null,
+      useWatermark: false
     });
     
-    res.json(updatedSettings);
+    return res.json(newSettings);
   } catch (error) {
-    console.error('Erro ao atualizar configurações:', error);
-    
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
-    }
-    
-    res.status(500).json({ message: 'Erro ao atualizar configurações do usuário' });
+    console.error('Erro ao obter configurações:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Erro ao obter configurações do usuário' 
+    });
   }
 });
 
-// Upload de logo
-router.post('/upload-logo', isAuthenticated, upload.single('logo'), async (req: any, res) => {
+// Rota para atualizar as configurações do usuário
+router.post('/update', isAuthenticated, async (req: any, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'Nenhum arquivo enviado' });
-    }
+    const userId = req.user?.claims?.sub || 'dev-user';
+    const { address, oabNumber, useWatermark } = req.body;
     
-    const userId = req.user.claims.sub;
+    // Verifica se as configurações existem
+    let settings = await storage.getUserSettings(userId);
     
-    // Obter configurações atuais
-    let userSettings = await storage.getUserSettings(userId);
-    
-    // Caminho relativo do arquivo para armazenar no banco
-    const relativePath = path.relative(process.cwd(), req.file.path);
-    
-    if (!userSettings) {
-      // Se não existir, criar um novo registro
-      userSettings = await storage.createUserSettings({
-        id: uuidv4(),
+    if (!settings) {
+      // Se não existir, cria uma nova
+      settings = await storage.createUserSettings({
         userId,
-        logoPath: relativePath,
+        logoPath: null,
         signaturePath: null,
-        address: '',
-        oabNumber: '',
-        useWatermark: false,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        address: address || null,
+        oabNumber: oabNumber || null,
+        useWatermark: useWatermark || false
       });
     } else {
-      // Se já existir, atualizar apenas o caminho do logo
-      // Excluir arquivo antigo se existir
-      if (userSettings.logoPath) {
-        const oldFilePath = path.join(process.cwd(), userSettings.logoPath);
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
+      // Atualiza as configurações existentes
+      settings = await storage.updateUserSettings(settings.id, {
+        address: address !== undefined ? address : settings.address,
+        oabNumber: oabNumber !== undefined ? oabNumber : settings.oabNumber,
+        useWatermark: useWatermark !== undefined ? useWatermark : settings.useWatermark
+      });
+    }
+    
+    return res.json({ 
+      success: true, 
+      message: 'Configurações atualizadas com sucesso', 
+      settings 
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar configurações:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Erro ao atualizar configurações do usuário' 
+    });
+  }
+});
+
+// Rota para upload de logo
+router.post('/upload-logo', isAuthenticated, upload.single('logo'), async (req: any, res) => {
+  try {
+    const userId = req.user?.claims?.sub || 'dev-user';
+    
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Nenhum arquivo enviado' 
+      });
+    }
+    
+    // Verifica se as configurações existem
+    let settings = await storage.getUserSettings(userId);
+    
+    // Caminho do arquivo
+    const filePath = req.file.path;
+    
+    if (!settings) {
+      // Se não existir, cria uma nova
+      settings = await storage.createUserSettings({
+        userId,
+        logoPath: filePath,
+        signaturePath: null,
+        address: null,
+        oabNumber: null,
+        useWatermark: false
+      });
+    } else {
+      // Se existir um logo anterior, remove
+      if (settings.logoPath && fs.existsSync(settings.logoPath)) {
+        try {
+          fs.unlinkSync(settings.logoPath);
+        } catch (err) {
+          console.error('Erro ao remover arquivo antigo:', err);
         }
       }
       
-      userSettings = await storage.updateUserSettings(userSettings.id, {
-        logoPath: relativePath
+      // Atualiza as configurações existentes
+      settings = await storage.updateUserSettings(settings.id, {
+        logoPath: filePath
       });
     }
     
-    res.json({
-      success: true,
-      logoPath: relativePath,
-      message: 'Logo atualizado com sucesso'
+    // URL da imagem para retornar ao cliente
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const logoUrl = `${baseUrl}/uploads/${path.basename(filePath)}`;
+    
+    return res.json({ 
+      success: true, 
+      message: 'Logo atualizado com sucesso', 
+      logoUrl,
+      settings 
     });
   } catch (error) {
     console.error('Erro ao fazer upload do logo:', error);
-    res.status(500).json({ message: 'Erro ao fazer upload do logo' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Erro ao fazer upload do logo' 
+    });
   }
 });
 
-// Upload de assinatura
+// Rota para upload de assinatura
 router.post('/upload-signature', isAuthenticated, upload.single('signature'), async (req: any, res) => {
   try {
+    const userId = req.user?.claims?.sub || 'dev-user';
+    
     if (!req.file) {
-      return res.status(400).json({ message: 'Nenhum arquivo enviado' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Nenhum arquivo enviado' 
+      });
     }
     
-    const userId = req.user.claims.sub;
+    // Verifica se as configurações existem
+    let settings = await storage.getUserSettings(userId);
     
-    // Obter configurações atuais
-    let userSettings = await storage.getUserSettings(userId);
+    // Caminho do arquivo
+    const filePath = req.file.path;
     
-    // Caminho relativo do arquivo para armazenar no banco
-    const relativePath = path.relative(process.cwd(), req.file.path);
-    
-    if (!userSettings) {
-      // Se não existir, criar um novo registro
-      userSettings = await storage.createUserSettings({
-        id: uuidv4(),
+    if (!settings) {
+      // Se não existir, cria uma nova
+      settings = await storage.createUserSettings({
         userId,
         logoPath: null,
-        signaturePath: relativePath,
-        address: '',
-        oabNumber: '',
-        useWatermark: false,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        signaturePath: filePath,
+        address: null,
+        oabNumber: null,
+        useWatermark: false
       });
     } else {
-      // Se já existir, atualizar apenas o caminho da assinatura
-      // Excluir arquivo antigo se existir
-      if (userSettings.signaturePath) {
-        const oldFilePath = path.join(process.cwd(), userSettings.signaturePath);
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
+      // Se existir uma assinatura anterior, remove
+      if (settings.signaturePath && fs.existsSync(settings.signaturePath)) {
+        try {
+          fs.unlinkSync(settings.signaturePath);
+        } catch (err) {
+          console.error('Erro ao remover arquivo antigo:', err);
         }
       }
       
-      userSettings = await storage.updateUserSettings(userSettings.id, {
-        signaturePath: relativePath
+      // Atualiza as configurações existentes
+      settings = await storage.updateUserSettings(settings.id, {
+        signaturePath: filePath
       });
     }
     
-    res.json({
-      success: true,
-      signaturePath: relativePath,
-      message: 'Assinatura atualizada com sucesso'
+    // URL da imagem para retornar ao cliente
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const signatureUrl = `${baseUrl}/uploads/${path.basename(filePath)}`;
+    
+    return res.json({ 
+      success: true, 
+      message: 'Assinatura atualizada com sucesso', 
+      signatureUrl,
+      settings 
     });
   } catch (error) {
     console.error('Erro ao fazer upload da assinatura:', error);
-    res.status(500).json({ message: 'Erro ao fazer upload da assinatura' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Erro ao fazer upload da assinatura' 
+    });
   }
 });
 
