@@ -9,6 +9,9 @@ import caseRoutes from "./routes/cases";
 import deadlineRoutes from "./routes/deadlines";
 import linkHealthRoutes from "./routes/link-health";
 import settingsRoutes from "./routes/settings";
+import path from "path";
+import fs from "fs";
+import express from "express";
 import { 
   analyzeDocument, 
   legalSearch, 
@@ -109,6 +112,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/deadlines', deadlineRoutes);
   app.use('/api/link-health', linkHealthRoutes);
   app.use('/api/settings', settingsRoutes);
+  
+  // Servir arquivos estáticos de uploads
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsDir));
 
   // Rota de usuário para desenvolvimento (retorna usuário mockado para todos os pedidos)
   app.get('/api/auth/user', async (req: any, res) => {

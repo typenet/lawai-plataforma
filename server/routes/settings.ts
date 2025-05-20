@@ -103,7 +103,7 @@ router.post('/update', isAuthenticated, async (req: any, res) => {
       });
     } else {
       // Atualiza as configurações existentes
-      settings = await storage.updateUserSettings(settings.id, {
+      settings = await storage.updateUserSettings(Number(settings.id), {
         address: address !== undefined ? address : settings.address,
         oabNumber: oabNumber !== undefined ? oabNumber : settings.oabNumber,
         useWatermark: useWatermark !== undefined ? useWatermark : settings.useWatermark
@@ -163,7 +163,7 @@ router.post('/upload-logo', isAuthenticated, upload.single('logo'), async (req: 
       }
       
       // Atualiza as configurações existentes
-      settings = await storage.updateUserSettings(settings.id, {
+      settings = await storage.updateUserSettings(Number(settings.id), {
         logoPath: filePath
       });
     }

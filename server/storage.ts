@@ -483,7 +483,7 @@ export class DatabaseStorage implements IStorage {
     return createdSettings;
   }
 
-  async updateUserSettings(id: string, updates: Partial<UserSettings>): Promise<UserSettings> {
+  async updateUserSettings(id: number, updates: Partial<UserSettings>): Promise<UserSettings> {
     const [updatedSettings] = await db
       .update(userSettings)
       .set({

@@ -161,7 +161,7 @@ export type Deadline = typeof deadlines.$inferSelect;
 
 // Tabela de configurações do usuário
 export const userSettings = pgTable("user_settings", {
-  id: varchar("id", { length: 36 }).primaryKey().defaultRandom().notNull(),
+  id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   logoPath: varchar("logo_path"),
   signaturePath: varchar("signature_path"),
