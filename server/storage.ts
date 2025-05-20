@@ -464,9 +464,6 @@ export class DatabaseStorage implements IStorage {
       pendingDeadlinesCount
     };
   }
-}
-
-
 
   // User Settings operations
   async getUserSettings(userId: string): Promise<UserSettings | undefined> {

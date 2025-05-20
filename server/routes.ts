@@ -8,6 +8,7 @@ import clientRoutes from "./routes/clients";
 import caseRoutes from "./routes/cases";
 import deadlineRoutes from "./routes/deadlines";
 import linkHealthRoutes from "./routes/link-health";
+import settingsRoutes from "./routes/settings";
 import { 
   analyzeDocument, 
   legalSearch, 
@@ -107,6 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/cases', caseRoutes);
   app.use('/api/deadlines', deadlineRoutes);
   app.use('/api/link-health', linkHealthRoutes);
+  app.use('/api/settings', settingsRoutes);
 
   // Rota de usuário para desenvolvimento (retorna usuário mockado para todos os pedidos)
   app.get('/api/auth/user', async (req: any, res) => {

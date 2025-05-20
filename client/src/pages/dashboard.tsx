@@ -227,7 +227,7 @@ export default function Dashboard() {
             icon={<Settings className="h-5 w-5" />}
             label="Configurações"
             active={activeSection === "settings"}
-            onClick={() => window.location.href = "/documentos"}
+            onClick={() => window.location.href = "/configuracoes"}
           />
         </nav>
 
