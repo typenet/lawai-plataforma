@@ -87,18 +87,15 @@ export default function NewDocument() {
   // Função para salvar o documento
   const saveDocumentMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('/api/documents', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: selectedTemplate === 'contrato-honorarios' 
-            ? 'Contrato de Honorários' 
-            : selectedTemplate === 'procuracao'
-            ? 'Procuração Ad Judicia'
-            : 'Petição de Juntada de Documentos',
-          content: documentText,
-          type: selectedTemplate,
-          status: 'draft'
-        })
+      return await apiRequest('/api/documents', 'POST', {
+        title: selectedTemplate === 'contrato-honorarios' 
+          ? 'Contrato de Honorários' 
+          : selectedTemplate === 'procuracao'
+          ? 'Procuração Ad Judicia'
+          : 'Petição de Juntada de Documentos',
+        content: documentText,
+        type: selectedTemplate,
+        status: 'draft'
       });
     },
     onSuccess: () => {
@@ -249,8 +246,8 @@ Pede deferimento.
 [CIDADE], [DATA].
 
 ____________________________
-[NOME DO(A) ADVOGADO(A)]
-OAB/[ESTADO] nº [NÚMERO DA OAB]`;
+${advogadoNome}
+OAB/${estado} nº ${oabNumero}`;
     }
     
     setDocumentText(modelContent);
@@ -456,11 +453,19 @@ OAB/[ESTADO] nº [NÚMERO DA OAB]`;
               />
               
               <div className="flex justify-end space-x-3 mt-4">
-                <Button variant="outline" className="text-gray-600">
+                <Button 
+                  variant="outline" 
+                  className="text-gray-600"
+                  onClick={() => setEditorVisible(false)}
+                >
                   Cancelar
                 </Button>
-                <Button className="bg-[#9F85FF] hover:bg-[#8A6EF3]">
-                  Salvar documento
+                <Button 
+                  className="bg-[#9F85FF] hover:bg-[#8A6EF3]"
+                  onClick={handleSaveDocument}
+                  disabled={isSaving}
+                >
+                  {isSaving ? 'Salvando...' : 'Salvar documento'}
                 </Button>
               </div>
             </div>
