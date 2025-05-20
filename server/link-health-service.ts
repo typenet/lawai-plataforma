@@ -183,8 +183,8 @@ export function generateLinkStats(results: LinkCheckResult[]): {
  */
 export function getSystemLinks(): Link[] {
   const baseUrl = process.env.NODE_ENV === 'production' 
-    ? 'https://' + (process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(',')[0] : 'localhost:3000')
-    : 'http://localhost:3000';
+    ? 'https://' + (process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(',')[0] : 'localhost:5000')
+    : 'http://localhost:5000';
   
   return [
     // Links de navegação principal
@@ -195,12 +195,14 @@ export function getSystemLinks(): Link[] {
     { url: `${baseUrl}/analytics`, label: 'Analytics', context: 'Menu Principal', importance: 'high' },
     { url: `${baseUrl}/clientes`, label: 'Clientes', context: 'Menu Principal', importance: 'critical' },
     { url: `${baseUrl}/prazos`, label: 'Prazos Processuais', context: 'Menu Principal', importance: 'critical' },
+    { url: `${baseUrl}/link-health`, label: 'Verificador de Links', context: 'Menu Principal', importance: 'medium' },
     
     // Links de documentos
     { url: `${baseUrl}/api/documents`, label: 'API Documentos', context: 'API', importance: 'critical' },
     { url: `${baseUrl}/api/clients`, label: 'API Clientes', context: 'API', importance: 'critical' },
     { url: `${baseUrl}/api/cases`, label: 'API Processos', context: 'API', importance: 'critical' },
     { url: `${baseUrl}/api/deadlines`, label: 'API Prazos', context: 'API', importance: 'critical' },
+    { url: `${baseUrl}/api/link-health/results`, label: 'API Verificador Links', context: 'API', importance: 'medium' },
     
     // Links de autenticação
     { url: `${baseUrl}/api/login`, label: 'Login', context: 'Autenticação', importance: 'critical' },
@@ -208,5 +210,14 @@ export function getSystemLinks(): Link[] {
     
     // Links de IA
     { url: `${baseUrl}/api/ai/query`, label: 'API IA Query', context: 'API IA', importance: 'high' },
+    
+    // Links externos relevantes
+    { url: 'https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm', label: 'Código Civil', context: 'Legislação', importance: 'high' },
+    { url: 'https://www.planalto.gov.br/ccivil_03/leis/l5869.htm', label: 'Código de Processo Civil Antigo', context: 'Legislação', importance: 'medium' },
+    { url: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13105.htm', label: 'Código de Processo Civil', context: 'Legislação', importance: 'high' },
+    { url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm', label: 'Código de Defesa do Consumidor', context: 'Legislação', importance: 'high' },
+    { url: 'https://www.gov.br/defesa/pt-br/arquivos/carteira/legislacao/codigo20penal20brasileiro.pdf/view', label: 'Código Penal', context: 'Legislação', importance: 'high' },
+    { url: 'https://www.stf.jus.br', label: 'STF', context: 'Jurisprudência', importance: 'high' },
+    { url: 'https://www.stj.jus.br', label: 'STJ', context: 'Jurisprudência', importance: 'high' },
   ];
 }

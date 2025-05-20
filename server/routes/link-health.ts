@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { checkLinks, generateLinkStats, getSystemLinks } from '../link-health-service';
-import { isAuthenticated } from '../replitAuth';
+// Usar autenticação simplificada para ambiente de desenvolvimento
+// import { isAuthenticated } from '../replitAuth';
+import { isAuthenticated } from '../simpleAuth';
 
 const router = Router();
 
