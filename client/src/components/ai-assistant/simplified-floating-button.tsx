@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Bot, X, Send, User, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { jsPDF } from "jspdf";
 
 type MessageRole = "user" | "assistant" | "action";
 
@@ -65,51 +66,69 @@ export default function SimplifiedFloatingButton() {
         ...prev,
         {
           role: "assistant",
-          content: "📄 O download da procuração foi iniciado. O documento será aberto em uma nova aba."
+          content: "📄 O download da procuração foi iniciado. O documento será salvo em formato PDF."
         }
       ]);
       
-      // Criar um documento fictício para download
-      const conteudoProcuracao = `
-PROCURAÇÃO
-
-OUTORGANTE: MARIA SILVA SANTOS, brasileira, portadora do CPF nº 218.320.908-92, 
-residente e domiciliada à Rua Doutor Paulo De Queiroz, 790, São Paulo/SP.
-
-OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado, inscrito na OAB/XX sob nº XXXXX, 
-com escritório profissional localizado à [ENDEREÇO COMPLETO].
-
-PODERES: Por este instrumento particular de procuração, a outorgante nomeia e constitui o outorgado 
-como seu procurador, conferindo-lhe poderes para o foro em geral, com a cláusula "ad judicia et extra", 
-em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes 
-e defendê-la nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais 
-e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, 
-firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente.
-
-São Paulo, ${new Date().toLocaleDateString('pt-BR')}.
-
-
-____________________________________
-MARIA SILVA SANTOS
-CPF: 218.320.908-92
-      `;
+      // Dados do cliente para a procuração
+      const cliente = {
+        nome: "MARIA SILVA SANTOS",
+        cpf: "218.320.908-92",
+        endereco: "Rua Doutor Paulo De Queiroz, 790",
+        cidade: "São Paulo",
+        estado: "SP"
+      };
       
-      // Criar um objeto Blob com o conteúdo do documento como texto
-      const blob = new Blob([conteudoProcuracao], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
+      // Criar um novo documento PDF
+      const doc = new jsPDF();
       
-      // Criar um link de download e clicar automaticamente
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Procuracao_Maria_Silva_Santos_${new Date().toISOString().slice(0,10)}.txt`;
-      document.body.appendChild(a);
-      a.click();
+      // Configurar fonte e tamanho
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
       
-      // Limpar o objeto URL após o download
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
+      // Título centralizado
+      doc.text("PROCURAÇÃO", 105, 20, { align: "center" });
+      
+      // Configurar fonte para o corpo do texto
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      
+      // Adicionar conteúdo com quebras de linha apropriadas
+      const linhasProcuracao = [
+        "",
+        "",
+        `OUTORGANTE: ${cliente.nome}, brasileira, portadora do CPF nº ${cliente.cpf},`,
+        `residente e domiciliada à ${cliente.endereco}, ${cliente.cidade}/${cliente.estado}.`,
+        "",
+        "OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado, inscrito na OAB/XX sob nº XXXXX,", 
+        "com escritório profissional localizado à [ENDEREÇO COMPLETO].",
+        "",
+        "PODERES: Por este instrumento particular de procuração, a outorgante nomeia e constitui o outorgado",
+        "como seu procurador, conferindo-lhe poderes para o foro em geral, com a cláusula \"ad judicia et extra\",",
+        "em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes",
+        "e defendê-la nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais",
+        "e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir,",
+        "firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente.",
+        "",
+        "",
+        `São Paulo, ${new Date().toLocaleDateString('pt-BR')}.`,
+        "",
+        "",
+        "",
+        "____________________________________",
+        `${cliente.nome}`,
+        `CPF: ${cliente.cpf}`
+      ];
+      
+      // Adicionar cada linha ao documento com espaçamento adequado
+      let y = 30;
+      for (const linha of linhasProcuracao) {
+        doc.text(linha, 20, y);
+        y += 8; // Espaçamento entre linhas
+      }
+      
+      // Salvar o PDF com nome apropriado
+      doc.save(`Procuracao_${cliente.nome.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
     }, 1500);
   };
 
