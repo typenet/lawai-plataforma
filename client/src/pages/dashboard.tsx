@@ -265,6 +265,13 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Visão Geral</h2>
+            <Button 
+              className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white px-4 flex items-center"
+              onClick={() => navigate("/novo-documento")}
+            >
+              <Clock className="mr-2 h-4 w-4" />
+              <span>Nova análise</span>
+            </Button>
           </div>
 
           {/* Stats Grid */}
@@ -292,26 +299,16 @@ export default function Dashboard() {
               iconBg="bg-emerald-100"
               percentage="+20%"
             />
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 relative">
-              <div className="absolute top-1 right-1">
-                <Button 
-                  className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white text-sm px-4"
-                  onClick={() => navigate("/novo-documento")}
-                >
-                  <span>Nova análise</span>
-                </Button>
-              </div>
-              <div className="flex items-start pt-8">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-lg mr-4 bg-amber-100">
-                    <Clock className="h-6 w-6 text-amber-500" />
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg mr-4 bg-amber-100">
+                  <Clock className="h-6 w-6 text-amber-500" />
+                </div>
+                <div>
+                  <div className="flex items-baseline">
+                    <div className="text-2xl font-bold">2:15</div>
                   </div>
-                  <div>
-                    <div className="flex items-baseline">
-                      <div className="text-2xl font-bold">2:15</div>
-                    </div>
-                    <div className="text-sm text-gray-500">Tempo Médio de Análise</div>
-                  </div>
+                  <div className="text-sm text-gray-500">Tempo Médio de Análise</div>
                 </div>
               </div>
             </div>
