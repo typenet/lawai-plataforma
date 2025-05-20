@@ -72,30 +72,89 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const config = await getOidcConfig();
+  // Configuração específica para desenvolvimento local
+  const isDevelopment = process.env.NODE_ENV !== 'production' || !process.env.REPLIT_DOMAINS;
 
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
-  };
+  if (isDevelopment) {
+    console.log("Iniciando em modo de desenvolvimento com autenticação local");
+    
+    // Adiciona rota para login de desenvolvimento
+    app.get("/api/login", (req, res) => {
+      // Cria um usuário de teste
+      const testUser = {
+        claims: {
+          sub: "999999",
+          email: "teste@exemplo.com",
+          first_name: "Usuário",
+          last_name: "Teste",
+          profile_image_url: "https://ui-avatars.com/api/?name=Dev&background=9F85FF&color=fff",
+          exp: Math.floor(Date.now() / 1000) + 3600 * 24
+        },
+        access_token: "dev-access-token",
+        refresh_token: "dev-refresh-token",
+        expires_at: Math.floor(Date.now() / 1000) + 3600 * 24
+      };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
+      // Salva o usuário na sessão
+      req.login(testUser, async () => {
+        // Adicionar usuário ao banco de dados
+        await storage.upsertUser({
+          id: testUser.claims.sub,
+          email: testUser.claims.email,
+          firstName: testUser.claims.first_name,
+          lastName: testUser.claims.last_name,
+          profileImageUrl: testUser.claims.profile_image_url,
+        });
+        
+        res.redirect("/dashboard");
+      });
+    });
+
+    // Adiciona rota para logout
+    app.get("/api/logout", (req, res) => {
+      req.logout(() => {
+        res.redirect("/");
+      });
+    });
+
+    // Rota de callback para desenvolvimento
+    app.get("/api/callback", (req, res) => {
+      res.redirect("/dashboard");
+    });
+
+    return; // Não configura as estratégias do Replit em desenvolvimento
+  }
+
+  // Configuração de produção com Replit Auth
+  try {
+    const config = await getOidcConfig();
+
+    const verify: VerifyFunction = async (
+      tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+      verified: passport.AuthenticateCallback
+    ) => {
+      const user = {};
+      updateUserSession(user, tokens);
+      await upsertUser(tokens.claims());
+      verified(null, user);
+    };
+
+    if (process.env.REPLIT_DOMAINS) {
+      for (const domain of process.env.REPLIT_DOMAINS.split(",")) {
+        const strategy = new Strategy(
+          {
+            name: `replitauth:${domain}`,
+            config,
+            scope: "openid email profile offline_access",
+            callbackURL: `https://${domain}/api/callback`,
+          },
+          verify,
+        );
+        passport.use(strategy);
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao configurar autenticação Replit:", error);
   }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
