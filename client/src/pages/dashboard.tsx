@@ -212,6 +212,12 @@ export default function Dashboard() {
             onClick={() => window.location.href = "/prazos"}
           />
           <SidebarLink
+            icon={<Search className="h-5 w-5" />}
+            label="Verificador de Links"
+            active={activeSection === "linkHealth"}
+            onClick={() => window.location.href = "/link-health"}
+          />
+          <SidebarLink
             icon={<HelpCircle className="h-5 w-5" />}
             label="Ajuda"
             active={activeSection === "help"}

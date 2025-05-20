@@ -16,6 +16,7 @@ import AnalyticsPage from "@/pages/analytics";
 import AITestPage from "@/pages/ai-test";
 import ClientsPage from "@/pages/clients";
 import DeadlinesPage from "@/pages/deadlines";
+import LinkHealthPage from "@/pages/link-health";
 import SimplifiedFloatingButton from "@/components/ai-assistant/simplified-floating-button";
 import FloatingWritingButton from "@/components/legal-writing-assistant/floating-writing-button";
 
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/analytics" component={() => <ProtectedRoute component={AnalyticsPage} />} />
       <Route path="/clientes" component={() => <ProtectedRoute component={ClientsPage} />} />
       <Route path="/prazos" component={() => <ProtectedRoute component={DeadlinesPage} />} />
+      <Route path="/link-health" component={() => <ProtectedRoute component={LinkHealthPage} />} />
       <Route path="/api-test" component={() => <ProtectedRoute component={AITestPage} />} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
