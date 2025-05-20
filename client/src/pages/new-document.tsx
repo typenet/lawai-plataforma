@@ -30,6 +30,8 @@ export default function NewDocument() {
   const [activeSection, setActiveSection] = useState("newDocument");
   const [dragActive, setDragActive] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [documentText, setDocumentText] = useState<string>("");
   
   // Verificar parâmetros na URL para pré-selecionar modelo
   useEffect(() => {
@@ -244,28 +246,29 @@ export default function NewDocument() {
           </div>
 
           {/* Upload Tabs */}
-          <Tabs defaultValue="upload" className="mb-8">
-            <TabsList className="border-b border-gray-200 w-full justify-start space-x-6 bg-transparent p-0" id="document-tabs">
-              <TabsTrigger 
-                value="upload" 
-                className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
-              >
-                Upload de arquivos
-              </TabsTrigger>
-              <TabsTrigger 
-                value="text" 
-                className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
-              >
-                Adicionar texto
-              </TabsTrigger>
-              <TabsTrigger 
-                value="modelos" 
-                data-value="modelos"
-                className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
-              >
-                Modelos prontos
-              </TabsTrigger>
-            </TabsList>
+          {!editorVisible ? (
+            <Tabs defaultValue="upload" className="mb-8">
+              <TabsList className="border-b border-gray-200 w-full justify-start space-x-6 bg-transparent p-0" id="document-tabs">
+                <TabsTrigger 
+                  value="upload" 
+                  className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
+                >
+                  Upload de arquivos
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="text" 
+                  className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
+                >
+                  Adicionar texto
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="modelos" 
+                  data-value="modelos"
+                  className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
+                >
+                  Modelos prontos
+                </TabsTrigger>
+              </TabsList>
             
             <TabsContent value="upload" className="mt-6">
               <div className="flex flex-col lg:flex-row gap-6">
@@ -434,7 +437,151 @@ export default function NewDocument() {
               
               {selectedTemplate && (
                 <div className="mt-8 flex justify-end">
-                  <Button className="bg-[#9F85FF] hover:bg-[#8A6EF3]">
+                  <Button 
+                    className="bg-[#9F85FF] hover:bg-[#8A6EF3]"
+                    onClick={() => {
+                      toast({
+                        title: "Modelo selecionado",
+                        description: `O modelo "${
+                          selectedTemplate === 'contrato-honorarios' ? 'Contrato de Honorários' : 
+                          selectedTemplate === 'procuracao' ? 'Procuração Ad Judicia' : 
+                          'Petição de Juntada'
+                        }" foi carregado com sucesso.`,
+                      });
+                      
+                      // Carregando o conteúdo do modelo selecionado
+                      let modelContent = "";
+                      
+                      if (selectedTemplate === 'contrato-honorarios') {
+                        modelContent = `CONTRATO DE HONORÁRIOS ADVOCATÍCIOS
+
+CONTRATANTE: [NOME DO CLIENTE], [NACIONALIDADE], [ESTADO CIVIL], [PROFISSÃO], inscrito no CPF sob nº [CPF], portador do RG nº [RG], residente e domiciliado na [ENDEREÇO COMPLETO], doravante denominado CLIENTE.
+
+CONTRATADO: [NOME DO ADVOGADO], advogado inscrito na OAB/[ESTADO] sob o nº [NÚMERO OAB], com escritório profissional na [ENDEREÇO DO ESCRITÓRIO], doravante denominado ADVOGADO.
+
+As partes acima identificadas têm, entre si, justo e acertado o presente Contrato de Honorários Advocatícios, que se regerá pelas cláusulas seguintes e pelas condições descritas no presente.
+
+CLÁUSULA PRIMEIRA - DO OBJETO
+
+O presente contrato tem por objeto a prestação de serviços advocatícios pelo ADVOGADO ao CLIENTE, consistentes em [DESCRIÇÃO DETALHADA DOS SERVIÇOS], incluindo a prática de todos os atos necessários ao bom andamento do processo.
+
+CLÁUSULA SEGUNDA - DOS HONORÁRIOS
+
+Pelos serviços prestados, o CLIENTE pagará ao ADVOGADO o valor de R$ [VALOR EM REAIS] ([VALOR POR EXTENSO]), a serem pagos da seguinte forma: [FORMA DE PAGAMENTO].
+
+§1º - Em caso de êxito na ação, o CLIENTE pagará ao ADVOGADO, a título de honorários de êxito, o percentual de [PERCENTUAL]% sobre o valor da condenação ou do proveito econômico obtido.
+
+§2º - Os honorários contratados não incluem despesas processuais, custas judiciais, diligências, cópias, deslocamentos, que serão de responsabilidade do CLIENTE.
+
+CLÁUSULA TERCEIRA - DAS OBRIGAÇÕES DO ADVOGADO
+
+O ADVOGADO se obriga a:
+1. Prestar os serviços advocatícios com zelo, dedicação e ética profissional;
+2. Manter o CLIENTE informado sobre o andamento do processo;
+3. Cumprir rigorosamente os prazos processuais;
+4. Guardar sigilo profissional sobre os fatos que tiver conhecimento em razão de sua atuação.
+
+CLÁUSULA QUARTA - DAS OBRIGAÇÕES DO CLIENTE
+
+O CLIENTE se obriga a:
+1. Fornecer tempestivamente todos os documentos e informações solicitados pelo ADVOGADO;
+2. Comparecer aos atos processuais quando solicitado;
+3. Pagar pontualmente os honorários advocatícios e as despesas processuais;
+4. Não realizar acordos diretos com a parte contrária sem a ciência e participação do ADVOGADO.
+
+CLÁUSULA QUINTA - DA VIGÊNCIA
+
+O presente contrato vigorará até o trânsito em julgado da sentença ou até o cumprimento integral de todas as obrigações deste contrato, o que ocorrer por último.
+
+CLÁUSULA SEXTA - DA RESCISÃO
+
+O presente contrato poderá ser rescindido a qualquer tempo, por qualquer das partes, mediante notificação prévia de 30 (trinta) dias.
+
+§1º - Em caso de rescisão por iniciativa do CLIENTE, este deverá pagar ao ADVOGADO os honorários proporcionais ao trabalho realizado até o momento da rescisão.
+
+§2º - Em caso de rescisão por iniciativa do ADVOGADO, sem justo motivo, este deverá continuar representando o CLIENTE por 10 (dez) dias, a fim de evitar prejuízos, salvo se o CLIENTE dispensar esses serviços.
+
+CLÁUSULA SÉTIMA - DO FORO
+
+As partes elegem o Foro da Comarca de [COMARCA], com renúncia expressa de qualquer outro, por mais privilegiado que seja, para dirimir quaisquer dúvidas ou controvérsias oriundas do presente contrato.
+
+E, por estarem assim justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença de 2 (duas) testemunhas abaixo assinadas.
+
+[LOCAL], [DATA].
+
+____________________________
+[NOME DO CLIENTE]
+CONTRATANTE
+
+____________________________
+[NOME DO ADVOGADO]
+CONTRATADO
+
+TESTEMUNHAS:
+
+____________________________
+Nome:
+CPF:
+
+____________________________
+Nome:
+CPF:`;
+                      } else if (selectedTemplate === 'procuracao') {
+                        modelContent = `PROCURAÇÃO "AD JUDICIA ET EXTRA"
+
+OUTORGANTE: [NOME COMPLETO], [NACIONALIDADE], [ESTADO CIVIL], [PROFISSÃO], portador(a) da cédula de identidade RG nº [NÚMERO DO RG], inscrito(a) no CPF/MF sob o nº [NÚMERO DO CPF], residente e domiciliado(a) na [ENDEREÇO COMPLETO], [CIDADE], [ESTADO], [CEP].
+
+OUTORGADO(S): [NOME DO ADVOGADO], brasileiro(a), advogado(a), inscrito(a) na OAB/[ESTADO] sob o nº [NÚMERO DA OAB], com escritório profissional na [ENDEREÇO COMPLETO DO ESCRITÓRIO], [CIDADE], [ESTADO], [CEP].
+
+PODERES: Por este instrumento particular de procuração, o(a) outorgante nomeia e constitui seu(sua) bastante procurador(a) o(a) outorgado(a) acima qualificado(a), a quem confere amplos poderes para o foro em geral, com a cláusula "ad judicia et extra", em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes e defendê-lo(a) nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente, podendo ainda substabelecer esta com ou sem reservas de poderes, dando tudo por bom, firme e valioso, especialmente para [FINALIDADE ESPECÍFICA DA PROCURAÇÃO, SE HOUVER].
+
+[CIDADE], [DATA POR EXTENSO].
+
+_______________________________________
+[NOME COMPLETO DO OUTORGANTE]`;
+                      } else if (selectedTemplate === 'juntada') {
+                        modelContent = `EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA [NÚMERO] VARA [CÍVEL/CRIMINAL/TRABALHISTA/ETC] DA COMARCA DE [NOME DA COMARCA]
+
+Processo nº [NÚMERO DO PROCESSO]
+
+[NOME DA PARTE] já qualificado(a) nos autos do processo em epígrafe, que move em face de [NOME DA PARTE CONTRÁRIA], por seu(sua) advogado(a) que esta subscreve, vem, respeitosamente, à presença de Vossa Excelência, requerer a JUNTADA dos documentos em anexo, consistentes em:
+
+1. [DESCRIÇÃO DO DOCUMENTO 1];
+2. [DESCRIÇÃO DO DOCUMENTO 2];
+3. [DESCRIÇÃO DO DOCUMENTO 3].
+
+Os documentos ora apresentados são indispensáveis para a comprovação dos fatos alegados pela parte requerente, em especial no que tange a [EXPLICAR A RELEVÂNCIA DOS DOCUMENTOS PARA O PROCESSO].
+
+Destaca-se que tais documentos estão sendo apresentados neste momento processual em razão de [JUSTIFICAR O MOMENTO DA JUNTADA, SE NECESSÁRIO].
+
+Nestes termos,
+Pede deferimento.
+
+[CIDADE], [DATA].
+
+____________________________
+[NOME DO(A) ADVOGADO(A)]
+OAB/[ESTADO] nº [NÚMERO DA OAB]`;
+                      }
+                      
+                      // Simulando um tempo de carregamento
+                      toast({
+                        title: "Carregando modelo...",
+                        description: "Por favor, aguarde enquanto preparamos o editor.",
+                      });
+                      
+                      setTimeout(() => {
+                        // Atualizar o estado para mostrar o editor
+                        setDocumentText(modelContent);
+                        setEditorVisible(true);
+                        
+                        toast({
+                          title: "Modelo carregado",
+                          description: "O modelo foi carregado e está pronto para edição.",
+                        });
+                      }, 1500);
+                    }}
+                  >
                     Usar modelo selecionado
                   </Button>
                 </div>
