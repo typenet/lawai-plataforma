@@ -140,6 +140,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     res.json(mockUser);
   });
+  
+  // Rota de logout
+  app.get('/api/logout', (req: any, res) => {
+    // Em ambiente de desenvolvimento, apenas redireciona
+    res.redirect('/');
+  });
 
   // Dashboard stats - Simplificado para desenvolvimento
   app.get('/api/dashboard/stats', async (req: any, res) => {
