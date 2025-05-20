@@ -391,6 +391,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para obter um documento específico
+  app.get('/api/documents/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const documentId = req.params.id;
+      
+      // Obter o documento
+      const document = await storage.getDocument(documentId);
+      
+      // Verificar se o documento existe e pertence ao usuário
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Documento não encontrado" });
+      }
+      
+      res.json({ document });
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      res.status(500).json({ message: "Failed to fetch document" });
+    }
+  });
+
   // Rota para listar documentos
   app.get('/api/documents', isAuthenticated, async (req: any, res) => {
     try {

@@ -60,9 +60,8 @@ const DocumentCard = ({ id, type, title, clientName, date, description }: Docume
           <button 
             className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
             onClick={() => {
-              // Ação para visualizar o documento
-              console.log("Visualizar documento", id);
-              window.location.href = `/documento/${id}`;
+              // Redirecionamos para novo-documento com o ID para carregar o documento
+              window.location.href = `/novo-documento?id=${id}&view=true`;
             }}
           >
             <Eye className="h-3 w-3 mr-1" />
@@ -71,9 +70,8 @@ const DocumentCard = ({ id, type, title, clientName, date, description }: Docume
           <button 
             className="text-sm text-[#9F85FF] hover:text-[#8A6EF3] flex items-center"
             onClick={() => {
-              // Ação para ver análise completa
-              console.log("Ver análise", id);
-              window.location.href = `/analise/${id}`;
+              // Redirecionamos para a página de dashboard com uma âncora para a análise
+              window.location.href = `/dashboard?doc=${id}#analise`;
             }}
           >
             <FileSearch className="h-3 w-3 mr-1" />

@@ -55,12 +55,43 @@ export default function NewDocument() {
     retry: false
   });
   
-  // Verificar parâmetros na URL para pré-selecionar modelo
+  // Estado para controlar se estamos visualizando (somente leitura)
+  const [viewOnly, setViewOnly] = useState(false);
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [documentTitle, setDocumentTitle] = useState<string>("Novo Documento");
+  
+  // Consulta para obter os detalhes de um documento específico quando temos um ID
+  const { data: documentData, isLoading: isLoadingDocument } = useQuery({
+    queryKey: ['/api/documents', documentId],
+    enabled: !!documentId,
+    queryFn: async () => {
+      if (!documentId) return null;
+      try {
+        const response = await apiRequest('GET', `/api/documents/${documentId}`);
+        return response;
+      } catch (error) {
+        console.error("Erro ao carregar documento:", error);
+        toast({
+          title: "Erro ao carregar documento",
+          description: "Não foi possível carregar o documento solicitado.",
+          variant: "destructive",
+        });
+        return null;
+      }
+    }
+  });
+  
+  // Verificar parâmetros na URL para pré-selecionar modelo ou carregar documento existente
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const modelo = params.get('modelo');
+    const docId = params.get('id');
+    const view = params.get('view');
     
-    if (modelo) {
+    if (docId) {
+      setDocumentId(docId);
+      setViewOnly(view === 'true');
+    } else if (modelo) {
       setSelectedTemplate(modelo);
       // Selecionar aba "Modelos" automaticamente se um modelo foi selecionado
       const tabsElement = document.getElementById('document-tabs');
@@ -74,6 +105,16 @@ export default function NewDocument() {
       }
     }
   }, [location]);
+  
+  // Carregar dados do documento quando ele for obtido
+  useEffect(() => {
+    if (documentData && documentData.document) {
+      const doc = documentData.document;
+      setDocumentTitle(doc.title || "Documento");
+      setDocumentText(doc.content || "");
+      setEditorVisible(true);
+    }
+  }, [documentData]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -140,6 +181,11 @@ export default function NewDocument() {
   const handleSaveDocument = () => {
     setIsSaving(true);
     saveDocumentMutation.mutate();
+  };
+  
+  // Função para voltar para a lista de documentos
+  const handleBackToDocuments = () => {
+    navigate('/documentos');
   };
 
   // Função para carregar o texto do modelo selecionado
