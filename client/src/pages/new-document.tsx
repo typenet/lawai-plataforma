@@ -371,6 +371,75 @@ export default function NewDocument() {
                 </div>
               </div>
             </TabsContent>
+            
+            <TabsContent value="modelos" className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Contrato de Honorários */}
+                <div className={`bg-white rounded-lg border ${selectedTemplate === 'contrato-honorarios' ? 'border-[#9F85FF] shadow-md' : 'border-gray-200'} overflow-hidden hover:border-[#9F85FF] hover:shadow-md transition-all`}>
+                  <div className="p-6">
+                    <div className="w-12 h-12 bg-[#F5F2FF] rounded-lg flex items-center justify-center mb-4">
+                      <FileText className="h-6 w-6 text-[#9F85FF]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Contrato de Honorários</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Modelo padrão de contrato de honorários advocatícios, com cláusulas essenciais e personalizáveis.
+                    </p>
+                    <Button 
+                      className={selectedTemplate === 'contrato-honorarios' ? 'bg-[#9F85FF] w-full' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 w-full'}
+                      onClick={() => setSelectedTemplate('contrato-honorarios')}
+                    >
+                      {selectedTemplate === 'contrato-honorarios' ? 'Selecionado' : 'Selecionar modelo'}
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Procuração Ad Judicia */}
+                <div className={`bg-white rounded-lg border ${selectedTemplate === 'procuracao' ? 'border-[#9F85FF] shadow-md' : 'border-gray-200'} overflow-hidden hover:border-[#9F85FF] hover:shadow-md transition-all`}>
+                  <div className="p-6">
+                    <div className="w-12 h-12 bg-[#F5F2FF] rounded-lg flex items-center justify-center mb-4">
+                      <FileText className="h-6 w-6 text-[#9F85FF]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Procuração Ad Judicia</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Modelo de procuração Ad Judicia para representação em processos judiciais com poderes da cláusula ad judicia.
+                    </p>
+                    <Button 
+                      className={selectedTemplate === 'procuracao' ? 'bg-[#9F85FF] w-full' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 w-full'}
+                      onClick={() => setSelectedTemplate('procuracao')}
+                    >
+                      {selectedTemplate === 'procuracao' ? 'Selecionado' : 'Selecionar modelo'}
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Petição de Juntada */}
+                <div className={`bg-white rounded-lg border ${selectedTemplate === 'juntada' ? 'border-[#9F85FF] shadow-md' : 'border-gray-200'} overflow-hidden hover:border-[#9F85FF] hover:shadow-md transition-all`}>
+                  <div className="p-6">
+                    <div className="w-12 h-12 bg-[#F5F2FF] rounded-lg flex items-center justify-center mb-4">
+                      <FileText className="h-6 w-6 text-[#9F85FF]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Petição de Juntada</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Modelo de petição para juntada de documentos em processos judiciais em andamento.
+                    </p>
+                    <Button 
+                      className={selectedTemplate === 'juntada' ? 'bg-[#9F85FF] w-full' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 w-full'}
+                      onClick={() => setSelectedTemplate('juntada')}
+                    >
+                      {selectedTemplate === 'juntada' ? 'Selecionado' : 'Selecionar modelo'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedTemplate && (
+                <div className="mt-8 flex justify-end">
+                  <Button className="bg-[#9F85FF] hover:bg-[#8A6EF3]">
+                    Usar modelo selecionado
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
           </Tabs>
         </main>
       </div>
