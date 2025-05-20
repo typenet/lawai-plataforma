@@ -67,8 +67,10 @@ export const documents = pgTable("documents", {
   fileType: varchar("file_type").notNull(), // pdf, doc, docx
   fileInfo: varchar("file_info"), // Size, pages, etc.
   filePath: varchar("file_path"), // Path to the file
+  content: text("content"), // Content of the document
   analysis: text("analysis"), // JSON string with analysis results
   status: varchar("status").notNull(), // complete, issues_found, incomplete
+  clientName: varchar("client_name", { length: 255 }), // Nome do cliente relacionado
   createdAt: timestamp("created_at").notNull(),
 });
 

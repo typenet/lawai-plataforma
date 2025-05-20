@@ -32,10 +32,17 @@ export default function Documents() {
   const [activeSection, setActiveSection] = useState("documents");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: documents, isLoading: documentsLoading } = useQuery<AnalyzedDocument[]>({
+  const [documentType, setDocumentType] = useState<string | null>(null);
+  const [clientName, setClientName] = useState<string | null>(null);
+  
+  // Obter a lista de documentos
+  const { data, isLoading: documentsLoading } = useQuery({
     queryKey: ["/api/documents"],
     enabled: isAuthenticated,
   });
+  
+  // Extrair os documentos dos dados retornados pela API
+  const documents = data?.documents || [];
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
