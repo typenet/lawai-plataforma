@@ -60,8 +60,10 @@ const DocumentCard = ({ id, type, title, clientName, date, description }: Docume
           <button 
             className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
             onClick={() => {
-              // Redirecionamos para novo-documento com o ID para carregar o documento
-              window.location.href = `/novo-documento?id=${id}&view=true`;
+              // Abrir um modal para visualizar o documento
+              // Por enquanto, apenas mostrar uma mensagem
+              alert(`O documento '${title}' seria aberto em um modal ou nova tela para visualização.`);
+              console.log("Visualizar documento", id);
             }}
           >
             <Eye className="h-3 w-3 mr-1" />
@@ -70,8 +72,9 @@ const DocumentCard = ({ id, type, title, clientName, date, description }: Docume
           <button 
             className="text-sm text-[#9F85FF] hover:text-[#8A6EF3] flex items-center"
             onClick={() => {
-              // Redirecionamos para a página de dashboard com uma âncora para a análise
-              window.location.href = `/dashboard?doc=${id}#analise`;
+              // Mostrar análise
+              alert(`A análise do documento '${title}' seria exibida aqui. Atualmente temos: ${description}`);
+              console.log("Ver análise", id);
             }}
           >
             <FileSearch className="h-3 w-3 mr-1" />
