@@ -25,10 +25,31 @@ import {
 
 export default function NewDocument() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [_, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("newDocument");
   const [dragActive, setDragActive] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  
+  // Verificar parâmetros na URL para pré-selecionar modelo
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const modelo = params.get('modelo');
+    
+    if (modelo) {
+      setSelectedTemplate(modelo);
+      // Selecionar aba "Modelos" automaticamente se um modelo foi selecionado
+      const tabsElement = document.getElementById('document-tabs');
+      if (tabsElement) {
+        setTimeout(() => {
+          const modelsTab = tabsElement.querySelector('[data-value="modelos"]');
+          if (modelsTab) {
+            (modelsTab as HTMLElement).click();
+          }
+        }, 100);
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -224,7 +245,7 @@ export default function NewDocument() {
 
           {/* Upload Tabs */}
           <Tabs defaultValue="upload" className="mb-8">
-            <TabsList className="border-b border-gray-200 w-full justify-start space-x-6 bg-transparent p-0">
+            <TabsList className="border-b border-gray-200 w-full justify-start space-x-6 bg-transparent p-0" id="document-tabs">
               <TabsTrigger 
                 value="upload" 
                 className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
@@ -236,6 +257,13 @@ export default function NewDocument() {
                 className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
               >
                 Adicionar texto
+              </TabsTrigger>
+              <TabsTrigger 
+                value="modelos" 
+                data-value="modelos"
+                className="pb-2 pt-1 px-0 data-[state=active]:border-b-2 data-[state=active]:border-[#9F85FF] data-[state=active]:text-[#9F85FF] text-gray-500 bg-transparent font-medium rounded-none"
+              >
+                Modelos prontos
               </TabsTrigger>
             </TabsList>
             

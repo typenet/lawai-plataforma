@@ -365,15 +365,24 @@ export default function Dashboard() {
                   <h4 className="font-medium text-gray-700">Modelos Sugeridos</h4>
                 </div>
                 <ul className="divide-y divide-gray-200">
-                  <li className="flex items-center p-3 hover:bg-gray-50">
+                  <li 
+                    className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate('/novo-documento?modelo=contrato-honorarios')}
+                  >
                     <File className="h-5 w-5 mr-3 text-[#9F85FF]" />
                     <span className="text-gray-700">Contrato de Honorários</span>
                   </li>
-                  <li className="flex items-center p-3 hover:bg-gray-50">
+                  <li 
+                    className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate('/novo-documento?modelo=procuracao')}
+                  >
                     <File className="h-5 w-5 mr-3 text-[#9F85FF]" />
                     <span className="text-gray-700">Procuração Ad Judicia</span>
                   </li>
-                  <li className="flex items-center p-3 hover:bg-gray-50">
+                  <li 
+                    className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate('/novo-documento?modelo=juntada')}
+                  >
                     <File className="h-5 w-5 mr-3 text-[#9F85FF]" />
                     <span className="text-gray-700">Petição de Juntada de Documentos</span>
                   </li>
