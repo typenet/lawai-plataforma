@@ -232,7 +232,7 @@ export default function SimplifiedFloatingButton() {
     }, 1000);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim()) return;
 
     // Adicionar mensagem do usuário ao histórico
@@ -240,56 +240,70 @@ export default function SimplifiedFloatingButton() {
     setMessage("");
     setIsTyping(true);
 
-    // Simular resposta da IA
-    setTimeout(() => {
-      const aiResponses = {
-        pesquisa: "Posso ajudar você a encontrar jurisprudência, doutrina ou legislação sobre qualquer tópico jurídico. Basta me dizer qual assunto você está pesquisando.",
-        documento: "Posso analisar seus documentos jurídicos, identificar problemas potenciais e sugerir melhorias. Você pode fazer upload de contratos, petições ou outros documentos para análise.",
-        prazo: "Para calcular prazos processuais, preciso saber a data inicial, o tipo de processo e o tribunal. Posso ajudar com cálculos precisos para você não perder nenhum prazo.",
-        default: "Estou aqui para ajudar com pesquisas jurídicas, análise de documentos, cálculo de prazos e muito mais. Como posso auxiliar você especificamente hoje?",
-      };
-      
-      let responseContent = aiResponses.default;
-      
-      // Identificar palavras-chave na mensagem do usuário
-      const lowerInput = message.toLowerCase();
-      
-      // Verificar se é solicitação de contrato de locação
-      if (lowerInput.includes("contrato") && (lowerInput.includes("locação") || lowerInput.includes("locacao"))) {
-        // Mensagem de processamento
-        setChatHistory(prev => [
-          ...prev, 
-          { 
-            role: "assistant", 
-            content: "Posso gerar um contrato de locação. Clique no botão abaixo:"
-          }
-        ]);
-        
-        // Adicionar botão de ação após um pequeno delay
-        setTimeout(() => {
-          setChatHistory(prev => [
-            ...prev, 
-            { 
-              role: "action", 
-              content: "Monte um contrato de locação para o cliente de CPF 218320908-92"
-            }
-          ]);
-          setIsTyping(false);
-        }, 500);
-        
-        return;
+    try {
+      // Enviar requisição para a API de IA
+      const response = await fetch('/api/ai/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          query: message,
+          context: "assistente jurídico" 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.status}`);
       }
-      // Verificar se é solicitação de procuração
-      else if (lowerInput.includes("procuração") || lowerInput.includes("procuracao")) {
-        if (lowerInput.includes("21832") || lowerInput.includes("218320908") || 
-            lowerInput.includes("cpf") || lowerInput.includes("cliente")) {
+
+      const data = await response.json();
+      
+      // Verificar se temos uma resposta da API
+      if (data.result || data.response) {
+        const responseText = data.result || data.response || "Não foi possível processar sua solicitação no momento.";
+        
+        // Identificar palavras-chave na mensagem do usuário e na resposta
+        const lowerInput = message.toLowerCase();
+        const lowerResponse = responseText.toLowerCase();
+        
+        // Verificar se é solicitação de contrato de locação
+        if ((lowerInput.includes("contrato") && (lowerInput.includes("locação") || lowerInput.includes("locacao"))) ||
+            (lowerResponse.includes("contrato") && (lowerResponse.includes("locação") || lowerResponse.includes("locacao")))) {
           
-          // Mensagem de processamento
+          // Adicionar resposta da IA  
           setChatHistory(prev => [
             ...prev, 
             { 
               role: "assistant", 
-              content: "Posso gerar uma procuração usando os dados do cliente. Clique no botão abaixo:"
+              content: responseText
+            }
+          ]);
+          
+          // Adicionar botão de ação após um pequeno delay
+          setTimeout(() => {
+            setChatHistory(prev => [
+              ...prev, 
+              { 
+                role: "action", 
+                content: "Monte um contrato de locação para o cliente de CPF 218320908-92"
+              }
+            ]);
+            setIsTyping(false);
+          }, 500);
+          
+          return;
+        }
+        // Verificar se é solicitação de procuração
+        else if (lowerInput.includes("procuração") || lowerInput.includes("procuracao") ||
+                 lowerResponse.includes("procuração") || lowerResponse.includes("procuracao")) {
+          
+          // Adicionar resposta da IA
+          setChatHistory(prev => [
+            ...prev, 
+            { 
+              role: "assistant", 
+              content: responseText
             }
           ]);
           
@@ -306,22 +320,28 @@ export default function SimplifiedFloatingButton() {
           }, 500);
           
           return;
-        } else {
-          responseContent = "Para gerar uma procuração, preciso do CPF ou nome do cliente. Você pode me fornecer essas informações?";
         }
+        
+        // Resposta padrão sem botões de ação
+        setChatHistory(prev => [...prev, { role: "assistant", content: responseText }]);
+      } else {
+        // Fallback se não tivermos uma resposta válida da API
+        setChatHistory(prev => [...prev, { 
+          role: "assistant", 
+          content: "Desculpe, estou com dificuldades para processar sua solicitação no momento. Poderia reformular sua pergunta?" 
+        }]);
       }
-      // Verificar outras palavras-chave
-      else if (lowerInput.includes("pesquisa") || lowerInput.includes("encontrar") || lowerInput.includes("buscar")) {
-        responseContent = aiResponses.pesquisa;
-      } else if (lowerInput.includes("documento") || lowerInput.includes("petição")) {
-        responseContent = aiResponses.documento;
-      } else if (lowerInput.includes("prazo") || lowerInput.includes("data") || lowerInput.includes("processo")) {
-        responseContent = aiResponses.prazo;
-      }
-
-      setChatHistory(prev => [...prev, { role: "assistant", content: responseContent }]);
+    } catch (error) {
+      console.error("Erro ao consultar API:", error);
+      
+      // Resposta em caso de erro
+      setChatHistory(prev => [...prev, { 
+        role: "assistant", 
+        content: "Desculpe, ocorreu um erro de comunicação. Por favor, tente novamente mais tarde." 
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (

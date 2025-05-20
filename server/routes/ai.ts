@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { isAuthenticated } from '../replitAuth';
 import * as aiService from '../ai-service';
+import * as deepseek from '../deepseek';
 
 const router = Router();
 
@@ -293,6 +294,77 @@ router.post('/recommend-documents', isAuthenticated, async (req, res) => {
     res.status(500).json({
       success: false,
       message: `Falha ao recomendar documentos: ${error.message || 'Erro desconhecido'}`
+    });
+  }
+});
+
+// Rota para consulta geral ao assistente de IA
+router.post('/query', async (req, res) => {
+  try {
+    const { query, context } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: 'Consulta não fornecida'
+      });
+    }
+    
+    // Log da consulta para monitoramento
+    console.log(`Consulta ao assistente de IA: "${query}"`);
+    
+    // Preparar o prompt para o modelo
+    const systemPrompt = `Você é um assistente jurídico especializado no direito brasileiro.
+Sua função é auxiliar advogados e profissionais jurídicos com informações precisas e atualizadas.
+Você deve responder em português do Brasil e com base na legislação brasileira.
+Seja claro, conciso e preciso em suas respostas. Mencione leis, códigos, artigos e jurisprudências relevantes quando aplicável.
+${context ? `Contexto adicional: ${context}` : ''}`;
+
+    try {
+      // Tentativa de usar o DeepSeek para gerar resposta
+      const response = await deepseek.legalSearch(query, systemPrompt);
+      
+      if (response && (response.result || response.choices?.[0]?.message?.content)) {
+        const result = response.result || response.choices?.[0]?.message?.content;
+        
+        return res.json({
+          success: true,
+          result: result
+        });
+      }
+      
+      // Fallback se não tiver resposta do DeepSeek
+      return res.json({
+        success: true,
+        result: "Sou seu assistente jurídico e estou pronto para ajudar com informações sobre legislação brasileira, análise de documentos, pesquisa jurisprudencial e geração de documentos. Por favor, reformule sua pergunta para que eu possa atendê-lo adequadamente."
+      });
+      
+    } catch (apiError) {
+      console.error('Erro ao consultar API DeepSeek:', apiError);
+      
+      // Resposta baseada em dados comuns para casos de erro na API
+      const fallbackResponse = `Como assistente jurídico, posso ajudá-lo com:
+      
+1. Análise de documentos jurídicos
+2. Pesquisa de legislação e jurisprudência
+3. Geração de documentos como procurações e contratos
+4. Informações sobre prazos processuais
+      
+Para gerar documentos, você pode me pedir "gere uma procuração" ou "crie um contrato de locação". 
+Posso fornecer informações sobre leis específicas como "explique a LGPD" ou "resumo da lei de inquilinato".`;
+      
+      return res.json({
+        success: true,
+        result: fallbackResponse,
+        note: "Resposta gerada por sistema de fallback"
+      });
+    }
+    
+  } catch (error) {
+    console.error('Erro na consulta ao assistente de IA:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Falha ao processar sua consulta. Por favor, tente novamente.'
     });
   }
 });
