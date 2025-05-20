@@ -210,7 +210,7 @@ export default function AnalyticsPage() {
             icon={<Users className="h-5 w-5" />}
             label="Clientes"
             active={activeSection === "clients"}
-            onClick={() => setActiveSection("clients")}
+            onClick={() => window.location.href = "/clientes"}
           />
           <SidebarLink
             icon={<HelpCircle className="h-5 w-5" />}
