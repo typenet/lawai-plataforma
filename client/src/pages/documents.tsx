@@ -27,9 +27,11 @@ import {
 } from "lucide-react";
 
 // Componente para o card de documento
+type DocumentType = "Documento" | "Contrato" | "Petição" | "Procuração" | "Parecer" | string;
+
 interface DocumentCardProps {
   id: string;
-  type: string;
+  type: DocumentType;
   title: string;
   clientName?: string;
   date: string;
@@ -107,27 +109,23 @@ export default function Documents() {
     id: string;
     title: string;
     fileType: string;
-    documentType: string;
-    clientName: string;
     status: string;
     analysis: string;
     createdAt: string;
     createdAgo: string;
+    clientName?: string;
     content?: string;
     fileInfo?: string;
   }
 
   // Obter a lista de documentos com filtros
-  const { data, isLoading: documentsLoading, refetch } = useQuery({
+  const { data, isLoading: documentsLoading, refetch } = useQuery<{documents: DocumentItem[]}>({
     queryKey: ["/api/documents", { search: searchQuery, documentType, clientName: clientFilter }],
     enabled: isAuthenticated,
   });
   
   // Extrair os documentos dos dados retornados pela API
   const documents = data?.documents || [];
-  
-  // Debug - remover depois
-  console.log("Documentos recebidos:", documents);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -491,7 +489,7 @@ export default function Documents() {
                   Novo documento
                 </Button>
               </div>
-            ) : documents.map(doc => {
+            ) : documents.map((doc: DocumentItem) => {
               // Determinar o tipo do documento com base no título
               let documentType = "Documento";
               if (doc.title.toLowerCase().includes("contrato")) documentType = "Contrato";
