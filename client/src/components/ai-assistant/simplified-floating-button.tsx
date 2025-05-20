@@ -351,7 +351,24 @@ export default function SimplifiedFloatingButton() {
                   <div className="w-full max-w-[80%]">
                     <Button 
                       className="w-full bg-[#9F85FF] hover:bg-[#8A6EF3] text-white flex items-center justify-center p-3"
-                      onClick={msg.content.includes("Baixar") ? handleDownloadPDF : handleProcuracaoAction}
+                      onClick={() => {
+                        // Se inclui locação, baixar um contrato de locação
+                        if (msg.content.toLowerCase().includes("locação") || msg.content.toLowerCase().includes("locacao")) {
+                          handleDownloadPDF();
+                        } 
+                        // Se inclui baixar, baixar o documento
+                        else if (msg.content.includes("Baixar")) {
+                          handleDownloadPDF();
+                        }
+                        // Para procuração
+                        else if (msg.content.toLowerCase().includes("procuração") || msg.content.toLowerCase().includes("procuracao")) {
+                          handleProcuracaoAction();
+                        }
+                        // Para qualquer outro tipo de documento
+                        else {
+                          handleDownloadPDF();
+                        }
+                      }}
                     >
                       {msg.content.includes("Baixar") ? (
                         <FileText className="h-4 w-4 mr-2" />
