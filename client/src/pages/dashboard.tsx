@@ -130,8 +130,18 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="flex justify-between">
-        <button className="text-sm text-gray-500 hover:text-gray-700">Visualizar</button>
-        <button className="text-sm text-[#9F85FF] hover:text-[#8A6EF3]">Ver análise</button>
+        <button 
+          onClick={() => window.location.href = "/documentos"}
+          className="text-sm text-gray-500 hover:text-gray-700"
+        >
+          Visualizar
+        </button>
+        <button 
+          onClick={() => window.location.href = "/novo-documento"}
+          className="text-sm text-[#9F85FF] hover:text-[#8A6EF3]"
+        >
+          Ver análise
+        </button>
       </div>
     </div>
   );
@@ -205,13 +215,13 @@ export default function Dashboard() {
             icon={<HelpCircle className="h-5 w-5" />}
             label="Ajuda"
             active={activeSection === "help"}
-            onClick={() => setActiveSection("help")}
+            onClick={() => window.location.href = "/documentos"}
           />
           <SidebarLink
             icon={<Settings className="h-5 w-5" />}
             label="Configurações"
             active={activeSection === "settings"}
-            onClick={() => setActiveSection("settings")}
+            onClick={() => window.location.href = "/documentos"}
           />
         </nav>
 
