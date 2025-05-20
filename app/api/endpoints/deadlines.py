@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
 from app.db.session import get_db
@@ -10,6 +10,7 @@ from app.models.case import Case
 from app.schemas.deadline import DeadlineCreate, DeadlineUpdate, Deadline as DeadlineSchema, DeadlineList
 from app.utils.security import get_current_user
 from app.utils.logger import logger
+from app.api.endpoints.deadlines_service import DeadlineService
 
 router = APIRouter()
 
@@ -80,38 +81,27 @@ async def create_deadline(
     """
     Cria um novo prazo
     """
-    # Verificar se o caso existe e pertence ao usuário atual, se um caso for fornecido
-    if deadline_create.case_id:
-        case = db.query(Case).filter(Case.id == deadline_create.case_id).first()
-        if not case:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Caso não encontrado"
-            )
-        
-        if case.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Sem permissão para criar prazo para este caso"
-            )
-    
-    # Definir o user_id como o ID do usuário atual
-    deadline_data = deadline_create.dict()
-    deadline_data["user_id"] = current_user.id
-    
-    deadline = Deadline(**deadline_data)
-    
     try:
-        db.add(deadline)
-        db.commit()
-        db.refresh(deadline)
+        # Usar o serviço para criar o prazo com validações
+        deadline = DeadlineService.create_deadline(
+            db=db,
+            user_id=current_user.id,
+            title=deadline_create.title,
+            description=deadline_create.description,
+            due_date=deadline_create.due_date,
+            case_id=deadline_create.case_id,
+            priority=deadline_create.priority
+        )
         return deadline
+    except HTTPException as e:
+        # Repassar exceções HTTP
+        raise e
     except Exception as e:
-        db.rollback()
-        logger.error(f"Erro ao criar prazo: {str(e)}")
+        # Logar e transformar outras exceções
+        logger.error(f"Erro inesperado ao criar prazo: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erro ao salvar o prazo"
+            detail=f"Erro ao salvar o prazo: {str(e)}"
         )
 
 @router.put("/{deadline_id}", response_model=DeadlineSchema)
