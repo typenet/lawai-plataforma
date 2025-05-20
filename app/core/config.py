@@ -1,9 +1,8 @@
 import os
-from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, Field
 from typing import Optional
 
-class Settings(BaseSettings):
+class Settings(BaseModel):
     PROJECT_NAME: str = "LawAI"
     API_V1_STR: str = "/api"
     
