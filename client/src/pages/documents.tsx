@@ -60,10 +60,8 @@ const DocumentCard = ({ id, type, title, clientName, date, description }: Docume
           <button 
             className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
             onClick={() => {
-              // Abrir um modal para visualizar o documento
-              // Por enquanto, apenas mostrar uma mensagem
-              alert(`O documento '${title}' seria aberto em um modal ou nova tela para visualização.`);
-              console.log("Visualizar documento", id);
+              // Redirecionar para a página de visualização de documento
+              window.location.href = `/visualizar-documento?id=${id}`;
             }}
           >
             <Eye className="h-3 w-3 mr-1" />
