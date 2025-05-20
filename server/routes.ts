@@ -7,6 +7,7 @@ import aiRoutes from "./routes/ai";
 import clientRoutes from "./routes/clients";
 import caseRoutes from "./routes/cases";
 import deadlineRoutes from "./routes/deadlines";
+import linkHealthRoutes from "./routes/link-health";
 import { 
   analyzeDocument, 
   legalSearch, 
@@ -105,6 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/clients', clientRoutes);
   app.use('/api/cases', caseRoutes);
   app.use('/api/deadlines', deadlineRoutes);
+  app.use('/api/link-health', linkHealthRoutes);
 
   // Rota de usuário para desenvolvimento (retorna usuário mockado para todos os pedidos)
   app.get('/api/auth/user', async (req: any, res) => {
@@ -327,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Parse the analysis from JSON
         let analysisObj;
         try {
-          analysisObj = JSON.parse(doc.analysis);
+          analysisObj = JSON.parse(doc.analysis || '{"summary": "Não foi possível carregar a análise"}');
         } catch (e) {
           analysisObj = { summary: "Não foi possível carregar a análise" };
         }
