@@ -24,6 +24,23 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  
+  // Ambiente de desenvolvimento usa armazenamento em memória para sessões
+  if (process.env.NODE_ENV !== 'production' || !process.env.REPLIT_DOMAINS) {
+    console.log("Usando armazenamento de sessão em memória para desenvolvimento");
+    return session({
+      secret: process.env.SESSION_SECRET || 'dev-secret-key',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false, // Em desenvolvimento, podemos usar HTTP
+        maxAge: sessionTtl,
+      },
+    });
+  }
+  
+  // Ambiente de produção usa PostgreSQL
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -31,6 +48,7 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -160,33 +178,98 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
-  });
+  // Configuração específica para desenvolvimento local
+  if (process.env.NODE_ENV !== 'production' || !process.env.REPLIT_DOMAINS) {
+    console.log("Configurando rotas de autenticação para ambiente de desenvolvimento");
+    
+    // Rota simplificada para login em desenvolvimento
+    app.get("/api/login", (req, res) => {
+      // Cria um usuário de teste
+      const testUser = {
+        claims: {
+          sub: "999999",
+          email: "teste@exemplo.com",
+          first_name: "Usuário",
+          last_name: "Teste",
+          profile_image_url: "https://ui-avatars.com/api/?name=Dev&background=9F85FF&color=fff",
+          exp: Math.floor(Date.now() / 1000) + 3600 * 24
+        },
+        access_token: "dev-access-token",
+        refresh_token: "dev-refresh-token",
+        expires_at: Math.floor(Date.now() / 1000) + 3600 * 24
+      };
 
-  app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-    })(req, res, next);
-  });
-
-  app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      // Salva o usuário na sessão
+      req.login(testUser, async () => {
+        // Adicionar usuário ao banco de dados
+        await storage.upsertUser({
+          id: testUser.claims.sub,
+          email: testUser.claims.email,
+          firstName: testUser.claims.first_name,
+          lastName: testUser.claims.last_name,
+          profileImageUrl: testUser.claims.profile_image_url,
+        });
+        
+        res.redirect("/dashboard");
+      });
     });
-  });
+    
+    // Rota para logout simplificada
+    app.get("/api/logout", (req, res) => {
+      req.logout(() => {
+        res.redirect("/");
+      });
+    });
+    
+    // Rota de callback para desenvolvimento
+    app.get("/api/callback", (req, res) => {
+      res.redirect("/dashboard");
+    });
+  } else {
+    // Configuração de produção com Replit Auth
+    app.get("/api/login", (req, res, next) => {
+      passport.authenticate(`replitauth:${req.hostname}`, {
+        prompt: "login consent",
+        scope: ["openid", "email", "profile", "offline_access"],
+      })(req, res, next);
+    });
+
+    app.get("/api/callback", (req, res, next) => {
+      passport.authenticate(`replitauth:${req.hostname}`, {
+        successReturnToOrRedirect: "/",
+        failureRedirect: "/api/login",
+      })(req, res, next);
+    });
+
+    app.get("/api/logout", async (req, res) => {
+      req.logout(() => {
+        try {
+          const oidcConfig = await getOidcConfig();
+          res.redirect(
+            client.buildEndSessionUrl(oidcConfig, {
+              client_id: process.env.REPL_ID!,
+              post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+            }).href
+          );
+        } catch (error) {
+          console.error("Erro ao fazer logout:", error);
+          res.redirect("/");
+        }
+      });
+    });
+  }
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Em desenvolvimento, permitir acesso sem autenticação ou com autenticação simplificada
+  if (process.env.NODE_ENV !== 'production' || !process.env.REPLIT_DOMAINS) {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    return next();
+  }
+  
+  // Em produção, usar o comportamento padrão com refresh token
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {
@@ -204,8 +287,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+    const oidcConfig = await getOidcConfig();
+    const tokenResponse = await client.refreshTokenGrant(oidcConfig, refreshToken);
     updateUserSession(user, tokenResponse);
     return next();
   } catch (error) {
