@@ -164,10 +164,22 @@ export default function ClientsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Garantir que todos os campos obrigatórios estejam presentes
+    const clientData = {
+      ...formData,
+      documentType: formData.documentType || "CPF",
+      documentNumber: formData.documentNumber || "",
+      name: formData.name || ""
+    };
+    
+    // Log para depuração
+    console.log("Dados do cliente sendo enviados:", clientData);
+    
     if (isEditClientOpen) {
-      editClientMutation.mutate(formData);
+      editClientMutation.mutate(clientData);
     } else {
-      addClientMutation.mutate(formData);
+      addClientMutation.mutate(clientData);
     }
   };
   
