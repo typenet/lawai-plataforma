@@ -141,6 +141,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(mockUser);
   });
   
+  // Configurações do usuário
+  app.get('/api/settings', async (req: any, res) => {
+    const userId = req.user?.claims?.sub || '999999';
+    
+    // Dados básicos para desenvolvimento
+    const settings = {
+      id: "settings_1",
+      userId: userId,
+      logoPath: null,
+      signaturePath: null,
+      address: "Avenida Paulista, 1000, cj. 101, São Paulo - SP",
+      oabNumber: "123456-SP",
+      useWatermark: true,
+      logoUrl: null,
+      signatureUrl: null
+    };
+    
+    res.json(settings);
+  });
+  
   // Rota de logout
   app.get('/api/logout', (req: any, res) => {
     // Em ambiente de desenvolvimento, apenas redireciona
