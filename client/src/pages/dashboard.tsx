@@ -265,12 +265,6 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Visão Geral</h2>
-            <Button 
-              className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white"
-              onClick={() => navigate("/novo-documento")}
-            >
-              <span>Nova análise</span>
-            </Button>
           </div>
 
           {/* Stats Grid */}
