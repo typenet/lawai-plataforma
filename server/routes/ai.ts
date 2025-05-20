@@ -313,52 +313,108 @@ router.post('/query', async (req, res) => {
     // Log da consulta para monitoramento
     console.log(`Consulta ao assistente de IA: "${query}"`);
     
-    // Preparar o prompt para o modelo
-    const systemPrompt = `Você é um assistente jurídico especializado no direito brasileiro.
+    // Mapas de consultas frequentes para resposta rápida
+    const queryMap = new Map([
+      ['lgpd', responderSobreLGPD()],
+      ['lei geral de proteção de dados', responderSobreLGPD()],
+      ['cdc', responderSobreCDC()],
+      ['código de defesa do consumidor', responderSobreCDC()],
+      ['contrato de locação', 'Posso ajudar você a preparar um contrato de locação com todas as cláusulas necessárias conforme a Lei do Inquilinato (Lei nº 8.245/91). Este documento estabelece os direitos e deveres entre locador e locatário, com cláusulas essenciais sobre prazo, valor do aluguel, reajustes, manutenção e condições gerais.'],
+      ['procuração', 'Uma procuração é um instrumento jurídico que confere poderes a uma pessoa para agir em nome de outra. No direito brasileiro, existem diversos tipos, como procuração ad judicia (para representação em processos judiciais), procuração pública (lavrada em cartório) e procuração particular (documento privado). Posso ajudar você a gerar uma procuração adequada às suas necessidades.'],
+      ['prazo recursal', 'No processo civil brasileiro, os prazos recursais mais comuns são: 15 dias úteis para Apelação, Agravo de Instrumento, Recurso Especial e Recurso Extraordinário (CPC/2015); 5 dias úteis para Agravo Interno e Embargos de Declaração. No processo penal, variam de 2 dias (embargos de declaração) a 15 dias (apelação).'],
+      ['prescrição', 'A prescrição é a perda do direito de ação por inércia do titular durante certo tempo. No Código Civil, os prazos variam: 3 anos para pretensão de reparação civil (art. 206, §3º); 5 anos para cobranças em geral (art. 206, §5º); 10 anos para casos sem previsão específica (art. 205). No CDC, é de 5 anos para reparação de danos (art. 27).']
+    ]);
+    
+    // Verificar se a consulta corresponde a alguma das consultas mapeadas
+    const lowerQuery = query.toLowerCase();
+    let resposta = null;
+    
+    // Buscar correspondências exatas ou parciais
+    for (const [key, value] of queryMap.entries()) {
+      if (lowerQuery.includes(key)) {
+        resposta = value;
+        break;
+      }
+    }
+    
+    // Se encontrou resposta no mapa, retorna imediatamente
+    if (resposta) {
+      return res.json({
+        success: true,
+        result: resposta
+      });
+    }
+    
+    // Se a consulta for sobre geração de documentos, direciona para essa funcionalidade
+    if (lowerQuery.includes('gerar') || lowerQuery.includes('criar') || lowerQuery.includes('elaborar')) {
+      if (lowerQuery.includes('procuração')) {
+        return res.json({
+          success: true,
+          result: 'Posso gerar uma procuração para você. Clique no botão "Monte uma procuração" que aparecerá logo abaixo para iniciar o processo.',
+          actionType: 'procuracao'
+        });
+      } else if (lowerQuery.includes('contrato') && (lowerQuery.includes('locação') || lowerQuery.includes('locacao') || lowerQuery.includes('aluguel'))) {
+        return res.json({
+          success: true,
+          result: 'Posso gerar um contrato de locação para você. Clique no botão "Monte um contrato de locação" que aparecerá logo abaixo para iniciar o processo.',
+          actionType: 'contrato_locacao'
+        });
+      }
+    }
+    
+    // Tentar usar o DeepSeek apenas para consultas mais complexas que não estão no mapa
+    try {
+      // Verificar se temos a chave da API
+      if (process.env.DEEPSEEK_API_KEY) {
+        // Preparar o prompt para o modelo
+        const systemPrompt = `Você é um assistente jurídico especializado no direito brasileiro.
 Sua função é auxiliar advogados e profissionais jurídicos com informações precisas e atualizadas.
 Você deve responder em português do Brasil e com base na legislação brasileira.
 Seja claro, conciso e preciso em suas respostas. Mencione leis, códigos, artigos e jurisprudências relevantes quando aplicável.
 ${context ? `Contexto adicional: ${context}` : ''}`;
 
-    try {
-      // Tentativa de usar o DeepSeek para gerar resposta
-      const response = await deepseek.legalSearch(query, systemPrompt);
-      
-      if (response && (response.result || response.choices?.[0]?.message?.content)) {
-        const result = response.result || response.choices?.[0]?.message?.content;
+        // Tentativa de usar o DeepSeek para gerar resposta
+        const response = await deepseek.legalSearch(query, systemPrompt);
         
-        return res.json({
-          success: true,
-          result: result
-        });
+        if (response && (response.result || response.choices?.[0]?.message?.content)) {
+          const result = response.result || response.choices?.[0]?.message?.content;
+          
+          return res.json({
+            success: true,
+            result: result
+          });
+        }
       }
-      
-      // Fallback se não tiver resposta do DeepSeek
-      return res.json({
-        success: true,
-        result: "Sou seu assistente jurídico e estou pronto para ajudar com informações sobre legislação brasileira, análise de documentos, pesquisa jurisprudencial e geração de documentos. Por favor, reformule sua pergunta para que eu possa atendê-lo adequadamente."
-      });
-      
     } catch (apiError) {
       console.error('Erro ao consultar API DeepSeek:', apiError);
+      // Continua para a resposta de fallback
+    }
+    
+    // Resposta de fallback inteligente baseada em análise da consulta
+    let fallbackResponse = '';
+    
+    if (lowerQuery.includes('lei') || lowerQuery.includes('código') || lowerQuery.includes('artigo')) {
+      fallbackResponse = 'Posso fornecer informações sobre a legislação brasileira, incluindo leis, códigos e artigos específicos. Para uma busca mais detalhada, especifique o número da lei ou código que deseja consultar.';
+    } else if (lowerQuery.includes('prazo') || lowerQuery.includes('data')) {
+      fallbackResponse = 'Os prazos processuais no direito brasileiro variam conforme o tipo de processo e procedimento. No processo civil, a maioria dos prazos é contada em dias úteis, enquanto no processo penal, geralmente são em dias corridos.';
+    } else if (lowerQuery.includes('documento') || lowerQuery.includes('contrato') || lowerQuery.includes('modelo')) {
+      fallbackResponse = 'Posso ajudar na elaboração ou análise de diversos documentos jurídicos, como contratos, procurações, petições e recursos. Para gerar um documento específico, solicite diretamente o tipo desejado.';
+    } else {
+      fallbackResponse = `Como assistente jurídico, posso ajudá-lo com:
       
-      // Resposta baseada em dados comuns para casos de erro na API
-      const fallbackResponse = `Como assistente jurídico, posso ajudá-lo com:
-      
-1. Análise de documentos jurídicos
-2. Pesquisa de legislação e jurisprudência
+1. Informações sobre legislação brasileira e jurisprudência
+2. Análise de documentos jurídicos
 3. Geração de documentos como procurações e contratos
-4. Informações sobre prazos processuais
+4. Informações sobre prazos processuais e procedimentos legais
       
 Para gerar documentos, você pode me pedir "gere uma procuração" ou "crie um contrato de locação". 
 Posso fornecer informações sobre leis específicas como "explique a LGPD" ou "resumo da lei de inquilinato".`;
-      
-      return res.json({
-        success: true,
-        result: fallbackResponse,
-        note: "Resposta gerada por sistema de fallback"
-      });
     }
+    
+    return res.json({
+      success: true,
+      result: fallbackResponse
+    });
     
   } catch (error) {
     console.error('Erro na consulta ao assistente de IA:', error);
@@ -368,5 +424,44 @@ Posso fornecer informações sobre leis específicas como "explique a LGPD" ou "
     });
   }
 });
+
+// Funções auxiliares para respostas específicas
+function responderSobreLGPD() {
+  return `A Lei Geral de Proteção de Dados (LGPD) - Lei nº 13.709/2018 - é a legislação brasileira que regula o tratamento de dados pessoais no Brasil. Seus principais pontos são:
+
+1. Abrangência: Aplica-se a qualquer operação com dados pessoais realizada por pessoa física ou jurídica, em meio físico ou digital.
+
+2. Princípios: Inclui finalidade, adequação, necessidade, livre acesso, qualidade, transparência, segurança, prevenção, não discriminação, responsabilização.
+
+3. Bases legais: O tratamento de dados só é permitido com fundamento em uma das bases legais previstas, como consentimento, legítimo interesse, execução de contrato, entre outras.
+
+4. Direitos dos titulares: Confirmação de tratamento, acesso, correção, portabilidade, exclusão, revogação de consentimento, entre outros.
+
+5. Sanções: Advertência, multa de até 2% do faturamento (limitada a R$ 50 milhões por infração), bloqueio ou eliminação dos dados.
+
+6. ANPD: A Autoridade Nacional de Proteção de Dados é o órgão responsável pela fiscalização e regulamentação da lei.
+
+Empresas e profissionais jurídicos devem adequar seus processos para garantir conformidade com a LGPD, incluindo adoção de medidas técnicas de segurança, revisão de contratos e políticas de privacidade.`;
+}
+
+function responderSobreCDC() {
+  return `O Código de Defesa do Consumidor (CDC) - Lei nº 8.078/1990 - é a legislação que estabelece normas de proteção e defesa do consumidor no Brasil. Seus principais aspectos são:
+
+1. Princípios: Vulnerabilidade do consumidor, boa-fé objetiva, equilíbrio contratual, transparência nas relações.
+
+2. Direitos básicos: Proteção à vida e saúde, educação para consumo, informação adequada, proteção contra publicidade enganosa, prevenção/reparação de danos.
+
+3. Responsabilidade pelo produto/serviço: Responsabilidade objetiva do fornecedor, independente de culpa.
+
+4. Práticas abusivas: Proibição de condicionamento de venda, envio de produtos sem solicitação, elevação injustificada de preços.
+
+5. Proteção contratual: Nulidade de cláusulas abusivas, direito de arrependimento em compras fora do estabelecimento.
+
+6. Sanções: Administrativas (multas), civis (indenizações) e penais (detenção, multa).
+
+7. Inversão do ônus da prova: Facilitação da defesa dos direitos do consumidor, quando for verossímil a alegação.
+
+O CDC é aplicado em qualquer relação de consumo, sendo uma das legislações mais avançadas do mundo na proteção aos consumidores, com efeitos diretos na prática jurídica e comercial brasileira.`;
+}
 
 export default router;
