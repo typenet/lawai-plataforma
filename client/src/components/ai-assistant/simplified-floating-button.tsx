@@ -41,6 +41,76 @@ export default function SimplifiedFloatingButton() {
         content: `✅ Procuração gerada com sucesso para o cliente:\n\n**Nome:** ${clienteEncontrado.nome}\n**CPF:** ${clienteEncontrado.cpf}\n**Endereço:** ${clienteEncontrado.endereco}, ${clienteEncontrado.cidade}/${clienteEncontrado.estado}\n\nVocê pode baixar a procuração completa em formato PDF ou solicitar outras ações.`
       }
     ]);
+    
+    // Adicionar o botão de download após um pequeno delay
+    setTimeout(() => {
+      setChatHistory(prev => [
+        ...prev,
+        {
+          role: "action",
+          content: "Baixar procuração em PDF"
+        }
+      ]);
+    }, 500);
+  };
+  
+  // Função para lidar com o download do PDF
+  const handleDownloadPDF = () => {
+    // Simular a preparação e download do arquivo
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      setIsTyping(false);
+      setChatHistory(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "📄 O download da procuração foi iniciado. O documento será aberto em uma nova aba."
+        }
+      ]);
+      
+      // Criar um documento fictício para download
+      const conteudoProcuracao = `
+PROCURAÇÃO
+
+OUTORGANTE: MARIA SILVA SANTOS, brasileira, portadora do CPF nº 218.320.908-92, 
+residente e domiciliada à Rua Doutor Paulo De Queiroz, 790, São Paulo/SP.
+
+OUTORGADO: [NOME DO ADVOGADO], [nacionalidade], advogado, inscrito na OAB/XX sob nº XXXXX, 
+com escritório profissional localizado à [ENDEREÇO COMPLETO].
+
+PODERES: Por este instrumento particular de procuração, a outorgante nomeia e constitui o outorgado 
+como seu procurador, conferindo-lhe poderes para o foro em geral, com a cláusula "ad judicia et extra", 
+em qualquer Juízo, Instância ou Tribunal, podendo propor contra quem de direito as ações competentes 
+e defendê-la nas contrárias, seguindo umas e outras, até final decisão, usando os recursos legais 
+e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, desistir, transigir, 
+firmar compromissos ou acordos, receber e dar quitação, agindo em conjunto ou separadamente.
+
+São Paulo, ${new Date().toLocaleDateString('pt-BR')}.
+
+
+____________________________________
+MARIA SILVA SANTOS
+CPF: 218.320.908-92
+      `;
+      
+      // Criar um objeto Blob com o conteúdo do documento
+      const blob = new Blob([conteudoProcuracao], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      // Criar um link de download e clicar automaticamente
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Procuracao_Maria_Silva_Santos_${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpar o objeto URL após o download
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }, 1500);
   };
 
   const handleSendMessage = () => {
@@ -155,9 +225,13 @@ export default function SimplifiedFloatingButton() {
                   <div className="w-full max-w-[80%]">
                     <Button 
                       className="w-full bg-[#9F85FF] hover:bg-[#8A6EF3] text-white flex items-center justify-center p-3"
-                      onClick={handleProcuracaoAction}
+                      onClick={msg.content.includes("Baixar") ? handleDownloadPDF : handleProcuracaoAction}
                     >
-                      <User className="h-4 w-4 mr-2" />
+                      {msg.content.includes("Baixar") ? (
+                        <FileText className="h-4 w-4 mr-2" />
+                      ) : (
+                        <User className="h-4 w-4 mr-2" />
+                      )}
                       {msg.content}
                     </Button>
                   </div>
