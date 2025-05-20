@@ -3,16 +3,44 @@ import { Bot, X, Send, User, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+type MessageRole = "user" | "assistant" | "action";
+
+interface ChatMessage {
+  role: MessageRole;
+  content: string;
+}
+
 export default function SimplifiedFloatingButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     { role: "assistant", content: "Olá! Sou a assistente virtual da JurisIA. Como posso ajudar você hoje?" }
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
   const toggleAssistant = () => {
     setIsOpen(!isOpen);
+  };
+
+  // Função para lidar com a ação de procuração
+  const handleProcuracaoAction = () => {
+    // Simular busca do cliente na base
+    const clienteEncontrado = {
+      nome: "Maria Silva Santos",
+      cpf: "218.320.908-92",
+      endereco: "Rua Doutor Paulo De Queiroz, 790",
+      cidade: "São Paulo",
+      estado: "SP"
+    };
+
+    // Resposta com a procuração gerada
+    setChatHistory(prev => [
+      ...prev,
+      { 
+        role: "assistant", 
+        content: `✅ Procuração gerada com sucesso para o cliente:\n\n**Nome:** ${clienteEncontrado.nome}\n**CPF:** ${clienteEncontrado.cpf}\n**Endereço:** ${clienteEncontrado.endereco}, ${clienteEncontrado.cidade}/${clienteEncontrado.estado}\n\nVocê pode baixar a procuração completa em formato PDF ou solicitar outras ações.`
+      }
+    ]);
   };
 
   const handleSendMessage = () => {
@@ -42,6 +70,35 @@ export default function SimplifiedFloatingButton() {
         responseContent = aiResponses.documento;
       } else if (lowerInput.includes("prazo") || lowerInput.includes("data") || lowerInput.includes("processo")) {
         responseContent = aiResponses.prazo;
+      } else if (lowerInput.includes("procuração") || lowerInput.includes("procuracao")) {
+        if (lowerInput.includes("21832") || lowerInput.includes("218320908") || 
+            lowerInput.includes("cpf") || lowerInput.includes("cliente")) {
+          
+          // Mensagem de processamento
+          setChatHistory(prev => [
+            ...prev, 
+            { 
+              role: "assistant", 
+              content: "Posso gerar uma procuração usando os dados do cliente. Clique no botão abaixo:"
+            }
+          ]);
+          
+          // Adicionar botão de ação após um pequeno delay
+          setTimeout(() => {
+            setChatHistory(prev => [
+              ...prev, 
+              { 
+                role: "action", 
+                content: "Monte uma procuração com os dados do cliente de cpf 218320908-92 que está gravado em minha base de dados"
+              }
+            ]);
+            setIsTyping(false);
+          }, 500);
+          
+          return;
+        } else {
+          responseContent = "Para gerar uma procuração, preciso do CPF ou nome do cliente. Você pode me fornecer essas informações?";
+        }
       }
 
       setChatHistory(prev => [...prev, { role: "assistant", content: responseContent }]);
@@ -94,24 +151,36 @@ export default function SimplifiedFloatingButton() {
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div
-                  className={`flex max-w-[80%] ${
-                    msg.role === "user" 
-                      ? "bg-[#9F85FF] text-white rounded-l-xl rounded-tr-xl" 
-                      : "bg-[#F8F6FF] text-gray-800 rounded-r-xl rounded-tl-xl"
-                  } p-3`}
-                >
-                  <div className="mr-2 mt-1">
-                    {msg.role === "user" ? (
-                      <User className="h-4 w-4" />
-                    ) : (
-                      <Bot className="h-4 w-4" />
-                    )}
+                {msg.role === "action" ? (
+                  <div className="w-full max-w-[80%]">
+                    <Button 
+                      className="w-full bg-[#9F85FF] hover:bg-[#8A6EF3] text-white flex items-center justify-center p-3"
+                      onClick={handleProcuracaoAction}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      {msg.content}
+                    </Button>
                   </div>
-                  <div>
-                    <p className="text-sm">{msg.content}</p>
+                ) : (
+                  <div
+                    className={`flex max-w-[80%] ${
+                      msg.role === "user" 
+                        ? "bg-[#9F85FF] text-white rounded-l-xl rounded-tr-xl" 
+                        : "bg-[#F8F6FF] text-gray-800 rounded-r-xl rounded-tl-xl"
+                    } p-3`}
+                  >
+                    <div className="mr-2 mt-1">
+                      {msg.role === "user" ? (
+                        <User className="h-4 w-4" />
+                      ) : (
+                        <Bot className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
             
