@@ -298,8 +298,8 @@ export default function Dashboard() {
               iconBg="bg-emerald-100"
               percentage="+20%"
             />
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-start justify-between">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 relative">
+              <div className="flex items-start">
                 <div className="flex items-center">
                   <div className="p-3 rounded-lg mr-4 bg-amber-100">
                     <Clock className="h-6 w-6 text-amber-500" />
@@ -311,13 +311,13 @@ export default function Dashboard() {
                     <div className="text-sm text-gray-500">Tempo Médio de Análise</div>
                   </div>
                 </div>
-                <Button 
-                  className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white text-sm px-4"
-                  onClick={() => navigate("/novo-documento")}
-                >
-                  <span>Nova análise</span>
-                </Button>
               </div>
+              <Button 
+                className="bg-[#9F85FF] hover:bg-[#8A6EF3] text-white text-sm px-4 absolute -top-3 -right-3"
+                onClick={() => navigate("/novo-documento")}
+              >
+                <span>Nova análise</span>
+              </Button>
             </div>
           </div>
 
