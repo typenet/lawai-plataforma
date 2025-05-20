@@ -226,7 +226,7 @@ router.post('/upload-signature', isAuthenticated, upload.single('signature'), as
       }
       
       // Atualiza as configurações existentes
-      settings = await storage.updateUserSettings(settings.id, {
+      settings = await storage.updateUserSettings(Number(settings.id), {
         signaturePath: filePath
       });
     }

@@ -76,7 +76,7 @@ export interface IStorage {
   // User Settings operations
   getUserSettings(userId: string): Promise<UserSettings | undefined>;
   createUserSettings(settings: InsertUserSettings): Promise<UserSettings>;
-  updateUserSettings(id: string, updates: Partial<UserSettings>): Promise<UserSettings>;
+  updateUserSettings(id: number, updates: Partial<UserSettings>): Promise<UserSettings>;
   
   // Usage statistics
   getUserStats(userId: string): Promise<{

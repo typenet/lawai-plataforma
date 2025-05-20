@@ -9,8 +9,6 @@ import caseRoutes from "./routes/cases";
 import deadlineRoutes from "./routes/deadlines";
 import linkHealthRoutes from "./routes/link-health";
 import settingsRoutes from "./routes/settings";
-import path from "path";
-import fs from "fs";
 import express from "express";
 import { 
   analyzeDocument, 
