@@ -298,10 +298,26 @@ export default function HistoryPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <button className="text-gray-400 hover:text-gray-600 p-1" title="Visualizar">
+                            <button 
+                              onClick={() => window.location.href = `/document/${doc.id}`}
+                              className="text-gray-400 hover:text-gray-600 p-1" 
+                              title="Visualizar"
+                            >
                               <Eye className="h-4 w-4" />
                             </button>
-                            <button className="text-gray-400 hover:text-gray-600 p-1" title="Baixar">
+                            <button 
+                              onClick={() => {
+                                // Create download link for the document
+                                const link = document.createElement('a');
+                                link.href = `/api/documents/${doc.id}/download`;
+                                link.download = `${doc.title}.pdf`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              className="text-gray-400 hover:text-gray-600 p-1" 
+                              title="Baixar"
+                            >
                               <Download className="h-4 w-4" />
                             </button>
                           </div>
