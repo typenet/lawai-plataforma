@@ -62,6 +62,7 @@ function Router() {
       <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/novo-documento" component={() => <ProtectedRoute component={NewDocument} />} />
       <Route path="/documentos" component={() => <ProtectedRoute component={Documents} />} />
+      <Route path="/documents" component={() => <ProtectedRoute component={Documents} />} />
       <Route path="/visualizar-documento" component={() => <ProtectedRoute component={DocumentViewer} />} />
       <Route path="/analise-documento" component={() => <ProtectedRoute component={DocumentAnalysis} />} />
       <Route path="/historico" component={() => <ProtectedRoute component={HistoryPage} />} />

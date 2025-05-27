@@ -283,9 +283,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Document analysis endpoints
   app.post('/api/documents/analyze', isAuthenticated, upload.single('document'), async (req: any, res) => {
     try {
+      console.log('Upload request received:', {
+        hasFile: !!req.file,
+        body: req.body,
+        contentType: req.headers['content-type']
+      });
+      
       if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+        console.error('No file in request');
+        return res.status(400).json({ message: "Nenhum arquivo foi enviado" });
       }
+      
+      console.log('File details:', {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        filename: req.file.filename
+      });
       
       const userId = req.user.claims.sub;
       
