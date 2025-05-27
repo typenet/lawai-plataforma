@@ -45,48 +45,59 @@ export async function analyzeDocument(
       
       // Chama DeepSeek
       const deepseekResult = await deepseekService.analyzeDocument(text, docTypeMap[documentType]);
-      
+      log(`Resultado bruto da análise DeepSeek: ${JSON.stringify(deepseekResult)}`, 'ai-service');
       // Mapeia o resultado para o formato esperado
       const findings = [];
-      
-      // Mapeia problemas encontrados
-      if (deepseekResult.issues && Array.isArray(deepseekResult.issues)) {
-        for (const issue of deepseekResult.issues) {
-          findings.push({
-            type: "issue",
-            description: issue,
-            severity: "medium"
-          });
-        }
-      }
-      
-      // Mapeia recomendações
-      if (deepseekResult.recommendations && Array.isArray(deepseekResult.recommendations)) {
-        for (const recommendation of deepseekResult.recommendations) {
-          findings.push({
-            type: "recommendation",
-            description: recommendation
-          });
-        }
-      }
-      
-      // Mapeia pontos-chave para pontos fortes
+        
       if (deepseekResult.keyPoints && Array.isArray(deepseekResult.keyPoints)) {
         for (const point of deepseekResult.keyPoints) {
           findings.push({
             type: "strength",
-            description: point
+            description: point.description,
+            location: point.location
           });
         }
       }
       
-      // Determina status com base na presença de problemas
-      const status = findings.some(f => f.type === "issue") 
+      if (deepseekResult.issues && Array.isArray(deepseekResult.issues)) {
+        for (const issue of deepseekResult.issues) {
+          findings.push({
+            type: "issue",
+            description: issue.description,
+            severity: issue.severity,
+            location: issue.location
+          });
+        }
+      }
+      
+      if (deepseekResult.recommendations && Array.isArray(deepseekResult.recommendations)) {
+        for (const recommendation of deepseekResult.recommendations) {
+          findings.push({
+            type: "recommendation",
+            description: recommendation.description,
+            location: recommendation.location
+          });
+        }
+      }
+
+      if (deepseekResult.missing_elements && Array.isArray(deepseekResult.missing_elements)) {
+        for (const missing of deepseekResult.missing_elements) {
+          findings.push({
+            type: "missing",
+            description: missing.description,
+            severity: missing.severity, // Adicionado severity para 'missing'
+            location: missing.location
+          });
+        }
+      }
+
+      // A lógica para determinar o 'status' pode ser mantida:
+      const status = findings.some(f => f.type === "issue" || f.type === "missing") 
         ? "issues_found" 
         : "complete";
       
       return {
-        summary: deepseekResult.summary || "Análise concluída",
+        summary: deepseekResult.summary || "Análise concluída.", // Usar o summary da DeepSeek
         findings,
         status
       };

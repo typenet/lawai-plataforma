@@ -38,19 +38,29 @@ export async function analyzeDocument(documentText: string, documentType: string
       
       ${documentText}
       
-      Por favor, forneça:
-      1. Um resumo do documento
-      2. Pontos principais e cláusulas importantes
-      3. Possíveis problemas ou inconsistências
-      4. Recomendações para melhorias
+      Analise este documento jurídico do tipo "${documentType}":
       
-      Formate a resposta como JSON com as seguintes chaves:
-      - summary
-      - keyPoints
-      - issues
-      - recommendations
+      ${documentText}
+      
+      Por favor, forneça uma análise detalhada em formato JSON. O JSON deve ter a seguinte estrutura:
+      {
+        "summary": "Um resumo conciso do documento.",
+        "keyPoints": [
+          { "description": "Um ponto principal ou cláusula importante.", "location": "Opcional: seção/parágrafo relevante" }
+        ],
+        "issues": [
+          { "description": "Um problema, risco ou inconsistência identificado.", "severity": "high|medium|low", "location": "Opcional: seção/parágrafo relevante" }
+        ],
+        "recommendations": [
+          { "description": "Uma recomendação para melhoria ou ação.", "location": "Opcional: seção/parágrafo relevante" }
+        ],
+        "missing_elements": [
+          { "description": "Um elemento importante que está faltando no documento.", "severity": "high|medium|low", "location": "Opcional: onde deveria estar" }
+        ]
+      }
+      Certifique-se de que a resposta seja um JSON válido.
     `;
-
+    log(`Enviando para DeepSeek - Prompt (primeiros 500 caracteres do texto do documento): Analisando tipo "${documentType}" com texto começando por: ${documentText.substring(0,500)}...`, 'deepseek');
     const response = await deepseekClient.post('/chat/completions', {
       model: 'deepseek-chat',
       messages: [
@@ -64,6 +74,7 @@ export async function analyzeDocument(documentText: string, documentType: string
     // Parse o resultado JSON
     let analysisResult;
     try {
+      log(`Resposta recebida da API DeepSeek (choices): ${JSON.stringify(response.data.choices)}`, 'deepseek');
       if (typeof response.data.choices[0].message.content === 'string') {
         analysisResult = JSON.parse(response.data.choices[0].message.content);
       } else {
@@ -82,6 +93,9 @@ export async function analyzeDocument(documentText: string, documentType: string
     return analysisResult;
   } catch (error) {
     log(`Erro ao chamar a API DeepSeek: ${error.message}`, 'deepseek');
+    if (error.response) {
+      log(`Erro da API DeepSeek - Status: ${error.response.status}, Data: ${JSON.stringify(error.response.data)}`, 'deepseek');
+    }
     throw new Error(`Falha na análise do documento: ${error.message}`);
   }
 }
