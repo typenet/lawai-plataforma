@@ -22,6 +22,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import pdf from "pdf-parse";
+import mammoth from "mammoth";
 
 // Setup multer for file uploads
 const upload = multer({
@@ -316,18 +318,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Extract text from document (simplified - in production would use pdf-parse/mammoth)
-      // For this implementation, we'll pretend we've extracted text
-      const extractedText = `This is a sample legal document containing contract terms. 
-      SECTION 1: INTRODUCTION
-      This agreement is made between the parties on this date.
-      
-      SECTION 2: TERMS
-      2.1 The parties agree to the following terms...
-      2.2 Payment shall be made within 30 days...
-      
-      SECTION 3: TERMINATION
-      This agreement may be terminated by either party with written notice.`;
+      let extractedText: string;
+      try {
+        if (req.file.mimetype === 'application/pdf') {
+          const dataBuffer = fs.readFileSync(req.file.path);
+          const data = await pdf(dataBuffer);
+          extractedText = data.text;
+        } else if (
+          req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+          req.file.mimetype === 'application/msword'
+        ) {
+          const result = await mammoth.extractRawText({ path: req.file.path });
+          extractedText = result.value;
+        } else {
+          // Clean up the uploaded file if it's not supported
+          fs.unlinkSync(req.file.path);
+          return res.status(400).json({ message: 'Unsupported file type for text extraction.' });
+        }
+        console.log("Texto extraído (primeiros 500 caracteres):", extractedText.substring(0, 500));
+      } catch (extractionError) {
+        console.error("Falha na extração de texto:", extractionError);
+        console.error("Error extracting text from document:", extractionError);
+        // Clean up the uploaded file in case of extraction error
+        fs.unlinkSync(req.file.path);
+        return res.status(500).json({ message: "Failed to extract text from document" });
+      }
       
       // Determine document type (simplified)
       let documentType: "contract" | "petition" | "power_of_attorney" | "general" = "general";
@@ -340,8 +355,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Analyze document with OpenAI
-      const analysis = await analyzeDocument(extractedText, documentType);
-      
+      const analysis = await aiService.analyzeDocument(extractedText, documentType as "contract" | "petition" | "power_of_attorney" | "general");
+      console.log("Análise recebida do aiService:", JSON.stringify(analysis, null, 2));
       // Save document to database
       const documentId = uuidv4();
       const fileInfo = `${req.file.size > 1024 * 1024 ? 
